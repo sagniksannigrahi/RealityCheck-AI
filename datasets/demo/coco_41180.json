@@ -1,0 +1,56 @@
+{
+ "fingerprint": "bd9a7d6c0a12c6d6f66bfbb203cca25aade7a17df77bab6c1da991518854ffe6",
+ "image": "images/COCO_val2014_000000041180.jpg",
+ "note": "DEMO scene: boxes are COCO ground-truth annotations, not model output.",
+ "scene": {
+  "objects": [
+   {
+    "label": "cow",
+    "box": {
+     "x1": 0.17740654205607478,
+     "y1": 0.28912499999999997,
+     "x2": 0.7674532710280374,
+     "y2": 0.804109375
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "cow",
+    "box": {
+     "x1": 0.25616822429906544,
+     "y1": 0.439171875,
+     "x2": 0.8485280373831776,
+     "y2": 0.7710781250000001
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "person",
+    "box": {
+     "x1": 0.5369392523364486,
+     "y1": 0.307140625,
+     "x2": 0.6139719626168224,
+     "y2": 0.46296875000000004
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "person",
+    "box": {
+     "x1": 0.7460514018691589,
+     "y1": 0.337140625,
+     "x2": 0.8023364485981308,
+     "y2": 0.43679687500000003
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   }
+  ],
+  "caption": "A large bull with long horns sitting on a beach.",
+  "default_p_yes": 0.5,
+  "vlm_answers": {}
+ }
+}

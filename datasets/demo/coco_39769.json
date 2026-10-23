@@ -1,0 +1,78 @@
+{
+ "fingerprint": "39f42f41d2d8af87ca706d62eeebc87155e61f1f7f97007026fb4d2b54603915",
+ "image": "images/COCO_val2014_000000039769.jpg",
+ "note": "DEMO scene: boxes are COCO ground-truth annotations, not model output.",
+ "scene": {
+  "objects": [
+   {
+    "label": "remote",
+    "box": {
+     "x1": 0.520140625,
+     "y1": 0.1657708333333333,
+     "x2": 0.5805312499999999,
+     "y2": 0.38725
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "remote",
+    "box": {
+     "x1": 0.06543750000000001,
+     "y1": 0.15458333333333335,
+     "x2": 0.273484375,
+     "y2": 0.2485416666666667
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "couch",
+    "box": {
+     "x1": 0.0016875000000000002,
+     "y1": 0.0,
+     "x2": 0.9994375,
+     "y2": 0.9865208333333333
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "bed",
+    "box": {
+     "x1": 0.0016718750000000002,
+     "y1": 0.002458333333333333,
+     "x2": 1.0,
+     "y2": 0.9979791666666668
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "cat",
+    "box": {
+     "x1": 0.02734375,
+     "y1": 0.11329166666666667,
+     "x2": 0.498046875,
+     "y2": 0.9778749999999999
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "cat",
+    "box": {
+     "x1": 0.54296875,
+     "y1": 0.05339583333333333,
+     "x2": 1.0,
+     "y2": 0.7695416666666667
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   }
+  ],
+  "caption": "A couple of cats laying on top of a pink blanket.",
+  "default_p_yes": 0.5,
+  "vlm_answers": {}
+ }
+}

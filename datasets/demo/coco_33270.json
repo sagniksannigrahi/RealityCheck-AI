@@ -1,0 +1,56 @@
+{
+ "fingerprint": "ef3c58d27a7869154ab63dcd40ec753b8b52671600843bde90ca9ae67f31aff2",
+ "image": "images/COCO_val2014_000000033270.jpg",
+ "note": "DEMO scene: boxes are COCO ground-truth annotations, not model output.",
+ "scene": {
+  "objects": [
+   {
+    "label": "tv",
+    "box": {
+     "x1": 0.7558906249999999,
+     "y1": 0.549319248826291,
+     "x2": 0.8733281249999999,
+     "y2": 0.6860798122065728
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "couch",
+    "box": {
+     "x1": 0.141109375,
+     "y1": 0.6725821596244131,
+     "x2": 0.91790625,
+     "y2": 0.9959154929577465
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "person",
+    "box": {
+     "x1": 0.635875,
+     "y1": 0.6763145539906104,
+     "x2": 0.681265625,
+     "y2": 0.7817840375586855
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   },
+   {
+    "label": "refrigerator",
+    "box": {
+     "x1": 0.0,
+     "y1": 0.5872300469483568,
+     "x2": 0.14040625,
+     "y2": 0.9856807511737089
+    },
+    "confidence": 0.9,
+    "grounding_score": 0.6
+   }
+  ],
+  "caption": "An India-design living room features warm reds and oranges and an ornate cabinet.",
+  "default_p_yes": 0.5,
+  "vlm_answers": {}
+ }
+}

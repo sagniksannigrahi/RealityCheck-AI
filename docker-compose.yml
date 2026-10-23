@@ -1,0 +1,70 @@
+# RealityCheck AI — local deployment (CPU). Memory limits are sized for a 16 GB laptop:
+# Postgres 512 MB, API 1 GB (does not load models), worker 6 GB (YOLO + Grounding DINO + SmolVLM ≈ 4.2 GB peak).
+# Start:  docker compose up --build        UI/API: http://localhost:8000   (API docs: /api/docs)
+# Demo only (no ML models): RC_MODEL_BACKEND=demo INSTALL_ML=false docker compose up --build
+name: realitycheck
+
+x-app-env: &app-env
+  RC_ENVIRONMENT: ${RC_ENVIRONMENT:-development}
+  RC_DATABASE_URL: postgresql+psycopg://realitycheck:${POSTGRES_PASSWORD:-realitycheck-dev}@db:5432/realitycheck
+  RC_SECRET_KEY: ${RC_SECRET_KEY:-change-me-in-production-please}
+  RC_MODEL_BACKEND: ${RC_MODEL_BACKEND:-auto}
+  RC_DEVICE: cpu
+  RC_WORKER_MODE: external
+  RC_AUTH_REQUIRED: ${RC_AUTH_REQUIRED:-false}
+  RC_API_KEYS: ${RC_API_KEYS:-}
+  RC_CORS_ORIGINS: ${RC_CORS_ORIGINS:-http://localhost:5173}
+  RC_LOG_JSON: "true"
+  RC_ALLOW_EXTERNAL_PROVIDERS: ${RC_ALLOW_EXTERNAL_PROVIDERS:-false}
+  RC_VLM_PROVIDER: ${RC_VLM_PROVIDER:-smolvlm}
+  RC_ANTHROPIC_API_KEY: ${RC_ANTHROPIC_API_KEY:-}
+  RC_MEDIA_RETENTION_DAYS: ${RC_MEDIA_RETENTION_DAYS:-30}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: realitycheck
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-realitycheck-dev}
+      POSTGRES_DB: realitycheck
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realitycheck -d realitycheck"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 512m
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      args:
+        INSTALL_ML: ${INSTALL_ML:-true}
+    image: realitycheck:local
+    environment: *app-env
+    ports: ["8000:8000"]
+    volumes: [storage:/data, models:/models]
+    depends_on:
+      db: { condition: service_healthy }
+    mem_limit: 1g
+    restart: unless-stopped
+
+  worker:
+    image: realitycheck:local
+    command: ["sh", "-c", "python scripts/download_models.py --if-missing && python -m app.workers.worker"]
+    working_dir: /app
+    environment:
+      <<: *app-env
+      PYTHONPATH: /app/backend
+    volumes: [storage:/data, models:/models]
+    depends_on:
+      api: { condition: service_healthy }
+    mem_limit: 6g
+    cpus: 4
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  storage:
+  models:
