@@ -1,0 +1,225 @@
+{
+  "experiment": "coco-cs-v1",
+  "run_id": "coco-cs-v1-20261024T170953-c225d2",
+  "seed": 13,
+  "n_boot": 1000,
+  "min_coverage": 0.6,
+  "val_fraction": 0.3,
+  "systems": {
+    "vlm_only": {
+      "name": "vlm_only",
+      "kind": "vlm_only",
+      "description": "Baseline 1: VLM yes/no probability alone (threshold tuned on val).",
+      "components": [
+        "vlm"
+      ],
+      "abstention": false,
+      "disagreement": true,
+      "tune": true
+    },
+    "detector_rules": {
+      "name": "detector_rules",
+      "kind": "detector_rules",
+      "description": "Baseline 2: closed-vocabulary detector + deterministic rules (abstains outside vocabulary).",
+      "components": [
+        "detector"
+      ],
+      "abstention": false,
+      "disagreement": true,
+      "tune": true
+    },
+    "vlm_grounding": {
+      "name": "vlm_grounding",
+      "kind": "eav",
+      "description": "Baseline 3: VLM + independent open-vocabulary grounding (forced decision).",
+      "components": [
+        "vlm",
+        "grounding",
+        "geometry",
+        "color"
+      ],
+      "abstention": false,
+      "disagreement": true,
+      "tune": true
+    },
+    "full": {
+      "name": "full",
+      "kind": "eav",
+      "description": "Baseline 4: full evidence pipeline, forced binary decision (no abstention).",
+      "components": [
+        "detector",
+        "grounding",
+        "vlm",
+        "color",
+        "geometry"
+      ],
+      "abstention": false,
+      "disagreement": true,
+      "tune": true
+    },
+    "eav_sa": {
+      "name": "eav_sa",
+      "kind": "eav",
+      "description": "Method: full pipeline with uncertainty-aware selective abstention (EAV-SA).",
+      "components": [
+        "detector",
+        "grounding",
+        "vlm",
+        "color",
+        "geometry"
+      ],
+      "abstention": true,
+      "disagreement": true,
+      "tune": true
+    },
+    "eav_sa_default": {
+      "name": "eav_sa_default",
+      "kind": "eav",
+      "description": "EAV-SA with default (untuned, pre-declared) thresholds.",
+      "components": [
+        "detector",
+        "grounding",
+        "vlm",
+        "color",
+        "geometry"
+      ],
+      "abstention": true,
+      "disagreement": true,
+      "tune": false
+    },
+    "ablate_no_grounding": {
+      "name": "ablate_no_grounding",
+      "kind": "eav",
+      "description": "Ablation: EAV-SA without grounding.",
+      "components": [
+        "detector",
+        "vlm",
+        "color",
+        "geometry"
+      ],
+      "abstention": true,
+      "disagreement": true,
+      "tune": true
+    },
+    "ablate_no_detector": {
+      "name": "ablate_no_detector",
+      "kind": "eav",
+      "description": "Ablation: EAV-SA without the closed-vocabulary detector.",
+      "components": [
+        "grounding",
+        "vlm",
+        "color",
+        "geometry"
+      ],
+      "abstention": true,
+      "disagreement": true,
+      "tune": true
+    },
+    "ablate_no_disagreement": {
+      "name": "ablate_no_disagreement",
+      "kind": "eav",
+      "description": "Ablation: EAV-SA without cross-source disagreement analysis.",
+      "components": [
+        "detector",
+        "grounding",
+        "vlm",
+        "color",
+        "geometry"
+      ],
+      "abstention": true,
+      "disagreement": false,
+      "tune": true
+    },
+    "ablate_no_vlm": {
+      "name": "ablate_no_vlm",
+      "kind": "eav",
+      "description": "Ablation: EAV-SA without the VLM (localizers + rules only).",
+      "components": [
+        "detector",
+        "grounding",
+        "color",
+        "geometry"
+      ],
+      "abstention": true,
+      "disagreement": true,
+      "tune": true
+    }
+  },
+  "grid": {
+    "vlm_strong": [
+      0.75,
+      0.85,
+      0.95
+    ],
+    "detector_strong": [
+      0.4,
+      0.5,
+      0.6
+    ],
+    "grounding_strong": [
+      0.35,
+      0.45,
+      0.55
+    ],
+    "decision_threshold": [
+      0.25,
+      0.35,
+      0.5
+    ]
+  },
+  "datasets": [
+    "coco-count-spatial"
+  ],
+  "dataset_versions": [
+    "instances_val2014"
+  ],
+  "n_examples": 454,
+  "n_cached": 454,
+  "split_label_counts": {
+    "test": {
+      "SUPPORTED": 162,
+      "CONTRADICTED": 162
+    },
+    "val": {
+      "SUPPORTED": 65,
+      "CONTRADICTED": 65
+    }
+  },
+  "subsets": [
+    "count",
+    "spatial"
+  ],
+  "simulated": false,
+  "models": {
+    "detector": {
+      "component": "detector",
+      "name": "ultralytics/yolo11n.pt",
+      "version": "ultralytics-8.4.184+sha256:0ebbc80d4a76",
+      "device": "cpu",
+      "demo": false,
+      "external": false
+    },
+    "grounder": {
+      "component": "grounding",
+      "name": "IDEA-Research/grounding-dino-tiny",
+      "version": "transformers-4.57.6",
+      "device": "cpu",
+      "demo": false,
+      "external": false
+    },
+    "verifier": {
+      "component": "vlm_verifier",
+      "name": "HuggingFaceTB/SmolVLM-500M-Instruct",
+      "version": "transformers-4.57.6+tiling=off",
+      "device": "cpu",
+      "demo": false,
+      "external": false
+    }
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "evidence_cache": "experiments/cache/coco-count-spatial__ultralytics_yolo11n.pt-IDEA-Research_grounding-dino-tiny-HuggingFaceTB_SmolVLM-500M-Instruct.jsonl"
+}

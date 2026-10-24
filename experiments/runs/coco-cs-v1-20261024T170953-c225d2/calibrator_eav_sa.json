@@ -1,0 +1,7 @@
+{
+  "a": 3.706379629009045,
+  "b": 0.29968195733381253,
+  "fitted_on": "coco-cs-v1-20261024T170953-c225d2:val",
+  "n_examples": 130,
+  "ece_validation": null
+}
