@@ -1,0 +1,77 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: rc, POSTGRES_PASSWORD: rc, POSTGRES_DB: rc }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U rc" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "3.12" }
+      - name: Install (no ML extras — tests use deterministic fake models)
+        run: uv sync --frozen --extra dev
+      - name: Lint
+        run: uv run ruff check backend scripts
+      - name: Unit, integration, security and adversarial tests (SQLite)
+        run: uv run pytest -q
+      - name: Migrations on PostgreSQL (upgrade, downgrade, upgrade, drift check)
+        env: { RC_DATABASE_URL: "postgresql+psycopg://rc:rc@localhost:5432/rc" }
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+          uv run alembic check
+      - name: API tests against PostgreSQL
+        env: { RC_TEST_DATABASE_URL: "postgresql+psycopg://rc:rc@localhost:5432/rc" }
+        run: uv run pytest -q backend/tests/test_api.py backend/tests/test_worker_storage_security.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "3.12" }
+      - run: uv sync --frozen --extra dev
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          npx playwright install --with-deps chromium
+          E2E_BROWSER_CHANNEL=chromium npx playwright test
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [backend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build slim (demo-only) image
+        run: docker build --build-arg INSTALL_ML=false -t realitycheck:ci .
+      - name: Smoke test
+        run: |
+          docker run -d --name rc -p 8000:8000 -e RC_MODEL_BACKEND=demo realitycheck:ci
+          for i in $(seq 1 30); do curl -fsS localhost:8000/api/v1/health/ready && break; sleep 2; done
+          curl -fsS localhost:8000/api/v1/system/info
