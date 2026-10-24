@@ -158,24 +158,50 @@ Note the AGPL-3.0 license of Ultralytics if you offer this as a network service.
 
 ## Evaluation results
 
-> **Main benchmark runs are in progress; this section will be updated with their results.**
-> The numbers below come from a **pilot** run only (small sample — treat as preliminary).
+All runs use real local models on CPU (YOLO11n, Grounding DINO tiny, SmolVLM-500M with tiling off). Images are split
+70/30 into test/val by image; thresholds are selected on val only and every number below is on the held-out **test**
+split. CIs are 95% cluster-bootstrap over images (1000 resamples). "Coverage" = share of claims the system decided
+rather than abstained on.
 
-**Pilot: POPE (COCO), 30 images × 6 questions = 180 object-existence claims; 132 on the held-out test split.**
-Real local models on CPU (YOLO11n, Grounding DINO tiny, SmolVLM-500M with tiling off). Thresholds selected on the
-validation split. Full report: [`experiments/runs/pope-pilot-20261023T165117-fe6ebf/report.md`](experiments/runs/pope-pilot-20261023T165117-fe6ebf/report.md).
+**POPE (COCO), 3 subsets × 50 images = 900 object-existence questions (137 unique images); 624 on test.**
+Full report: [`experiments/runs/pope-v1-20261024T165747-ff2597/report.md`](experiments/runs/pope-v1-20261024T165747-ff2597/report.md).
 
 | System | Coverage | Accuracy (covered) | Macro-F1 [95% CI] |
 |---|---|---|---|
-| VLM only | 100% | 0.841 | 0.839 [0.764, 0.916] |
-| Detector + rules | 100% | 0.871 | 0.869 [0.829, 0.916] |
-| VLM + grounding | 100% | 0.902 | 0.901 [0.853, 0.954] |
-| Full pipeline (forced decision) | 100% | 0.902 | 0.901 [0.845, 0.947] |
-| **EAV-SA (with abstention)** | 73.5% | 0.948 | 0.948 [0.903, 0.988] |
+| VLM only | 100% | 0.849 | 0.849 [0.812, 0.880] |
+| Detector + rules | 100% | 0.853 | 0.850 [0.822, 0.877] |
+| VLM + grounding | 100% | 0.864 | 0.863 [0.829, 0.894] |
+| Full pipeline (forced decision) | 100% | 0.872 | 0.871 [0.843, 0.897] |
+| **EAV-SA (with abstention)** | 72.0% | 0.960 | 0.959 [0.941, 0.977] |
+| EAV-SA, untuned default thresholds | 76.3% | 0.943 | 0.942 [0.922, 0.961] |
 
-On this pilot, the full pipeline beat VLM-only by +0.061 macro-F1 (paired bootstrap 95% CI [0.022, 0.107]); EAV-SA
-traded 26.5% abstention for higher accuracy on the claims it decided. The sample is small and covers only
-object-existence claims.
+- The full pipeline's gain over VLM-only is small and **not significant** (+0.022 macro-F1, CI [−0.001, 0.048], p=0.06).
+  The pilot run (180 questions) had suggested +0.061; the larger sample does not confirm that.
+- Selective abstention is the clear effect: on the 72% of claims EAV-SA decides, accuracy rises by +0.088 over the
+  forced-decision pipeline (CI [0.064, 0.114]). Abstentions counted as errors, effective accuracy is 0.691.
+- Ablations: removing grounding hurts (−0.041 macro-F1, significant); removing the detector or the disagreement check
+  makes no significant difference; without the VLM the system never outputs CONTRADICTED (a missing detection is not
+  proof of absence), so it abstains on almost all negatives.
+
+**COCO-derived counting and left/right claims, 200 images = 454 claims (286 count + 38 spatial on test).**
+Full report: [`experiments/runs/coco-cs-v1-20261024T170953-c225d2/report.md`](experiments/runs/coco-cs-v1-20261024T170953-c225d2/report.md).
+
+| System | Coverage | Accuracy (covered) | Macro-F1 [95% CI] |
+|---|---|---|---|
+| VLM only | 100% | 0.580 | 0.580 [0.542, 0.620] |
+| Detector + rules | 92.0% | 0.728 | 0.708 [0.655, 0.757] |
+| VLM + grounding | 100% | 0.802 | 0.802 [0.760, 0.844] |
+| Full pipeline (forced decision) | 100% | 0.775 | 0.771 [0.727, 0.814] |
+| EAV-SA (with abstention) | 61.1% | 0.808 | 0.806 [0.754, 0.856] |
+| EAV-SA, untuned default thresholds | 44.1% | 0.888 | 0.888 [0.836, 0.935] |
+
+- SmolVLM alone is near chance at counting (0.580). Adding independent localizers gives the largest gain measured
+  in this project: full pipeline vs VLM-only +0.191 macro-F1 (CI [0.140, 0.243]).
+- Abstention helps less here. No threshold setting reached the required 60% validation coverage, so tuning fell back
+  to the highest-coverage setting. The untuned defaults are more accurate but decide only 44% of claims.
+- Grounding-based counts are capped at "weak" evidence, so removing grounding leaves EAV-SA's count verdicts unchanged
+  on this data.
+- Spatial claims are few (38 test claims); every abstaining variant was 100% accurate on those it decided.
 
 **Video sampling ablation (synthetic videos, sampling only, no models):** with a 4-frame budget, scene-aware sampling
 captured a frame inside 100% of brief (0.3–1.2 s) abrupt events vs 10–40% for uniform/interval sampling
@@ -197,7 +223,9 @@ E2E_MODEL_BACKEND=real npx playwright test   # same flow with real models (slow,
 
 Latest results on the development machine (macOS, Python 3.12, Node 26):
 backend **145 passed** (3 real-model tests deselected by default), ruff clean; frontend **17 passed**, production build OK;
-Playwright E2E **2 passed** (real server, demo models, Google Chrome). CI runs the same suites plus PostgreSQL migration checks.
+Playwright E2E **2 passed** (real server, demo models, Google Chrome). Against PostgreSQL 16 (Docker): Alembic
+upgrade → downgrade → upgrade with no drift, and the API/worker/security suites **50 passed**. The slim Docker image
+builds and passes the health/UI smoke test. CI runs all of the above.
 
 ## Project layout
 
@@ -224,7 +252,7 @@ docs/                architecture, API, database, evaluation, research method, s
 - **No OCR engine:** quoted-text claims are checked by the VLM only.
 - **Video:** no real video benchmark was run; temporal rules cover a fixed verb set; motion analysis ignores camera motion and uses naive per-frame tracking.
 - **Evaluation scope:** POPE subset and COCO-derived synthetic claims; COCO annotations are incomplete (label noise); thresholds were tuned on a small validation split and may not transfer.
-- **Not verified here:** the Docker images, PostgreSQL at runtime (the migration SQL was generated and CI tests it), the S3 adapter, and the Anthropic adapter against the live API (no credentials).
+- **Not verified here:** the full ML Docker image and the Compose stack with real models (only the slim demo image was built and smoke-tested), the S3 adapter, and the Anthropic adapter against the live API (no credentials).
 - **Operations:** in-process rate limiting; DB-polling queue (fine for single-node scale); no malware scanning of uploads.
 - **License:** Ultralytics YOLO is AGPL-3.0.
 

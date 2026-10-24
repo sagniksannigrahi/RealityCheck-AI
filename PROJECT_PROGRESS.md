@@ -21,7 +21,7 @@ It is updated at the end of every phase. Only results that were actually execute
 - [x] Phase 5 — Evidence engine, decision rules, selective abstention
 - [x] Phase 6 — Video sampling, timestamped evidence, temporal verification
 - [x] Phase 7 — React frontend + evidence visualization
-- [x] Phase 8 — Dataset adapters, baselines, metrics, reproducible experiments (main runs in progress)
+- [x] Phase 8 — Dataset adapters, baselines, metrics, reproducible experiments
 - [x] Phase 9 — Security, integration, adversarial tests, performance checks
 - [ ] Phase 10 — Docker, docs, CI, end-to-end verification, push to GitHub
 
@@ -46,3 +46,16 @@ It is updated at the end of every phase. Only results that were actually execute
 - Video sampling ablation on synthetic videos done (scene-aware 100% event recall at 4 frames vs 10–40% uniform/interval).
 - Main runs launched: POPE 3×50 images (900 q), COCO count/spatial 200 images. CHAIR generate-and-verify script ready.
 - Docker files, CI workflow, docs written; Docker build pending (deferred until evaluation finishes to protect RAM).
+
+### Phase 10 (2026-10-24)
+- Project moved from `~/Documents/VS code/` to `~/Downloads/VS Projects/`; venv entry-point scripts repointed.
+- Main POPE run completed (resumed from 848/900 cached examples): `experiments/runs/pope-v1-20261024T165747-ff2597`.
+  EAV-SA 72.0% coverage, 0.960 accuracy on covered; full vs VLM-only +0.022 macro-F1, not significant (p=0.06).
+- COCO count/spatial run completed (200 images, 454 claims): `experiments/runs/coco-cs-v1-20261024T170953-c225d2`.
+  Full vs VLM-only +0.191 macro-F1 (significant); abstention could not meet 60% val coverage (fallback setting used).
+- CHAIR script: fixed a crash (`sorted()` over dicts) and None-formatting; ground truth now adds objects named in the
+  reference captions (original CHAIR protocol).
+- PostgreSQL 16 (Docker): migrations up/down/up + `alembic check` clean; API/worker/security tests 50 passed.
+- Slim Docker image built and smoke-tested (health ready, UI 200). Full ML image not built.
+- Playwright E2E 2 passed; backend 145 passed; frontend 17 passed; ruff clean.
+- CI workflow committed; push blocked until the GitHub token has the `workflow` scope.

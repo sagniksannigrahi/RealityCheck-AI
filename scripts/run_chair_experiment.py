@@ -2,7 +2,7 @@
 
 1. The generator VLM writes a caption for each sampled image (generate_and_verify mode).
 2. Claims are extracted; object-existence claims whose subject maps to a COCO class are labelled from COCO instance
-   annotations: SUPPORTED if the class is annotated in the image, CONTRADICTED otherwise ("hallucinated mention").
+   annotations plus objects named in the reference captions (as in CHAIR): SUPPORTED if present, CONTRADICTED otherwise ("hallucinated mention").
    COCO annotations are incomplete, so some "hallucinated" labels are wrong; results are reported as such.
 3. The verifier (EAV-SA, default declared thresholds — no tuning on this data) decides each claim.
 4. Reports CHAIR-i / CHAIR-s of the raw captions, hallucination-detection metrics, and CHAIR-i after removing mentions
@@ -52,7 +52,13 @@ def main() -> None:
     gt: dict[int, set[str]] = {}
     for a in ann["annotations"]:
         gt.setdefault(a["image_id"], set()).add(cats[a["category_id"]])
-    imgs = sorted(i for i in ann["images"] if i["id"] in gt)
+    # As in the original CHAIR (Rohrbach et al., 2018), objects named in the human reference captions also count as
+    # present; this reduces (does not remove) label noise from objects missing in the instance annotations.
+    caps = json.loads((ROOT / "datasets/raw/coco/annotations/captions_val2014.json").read_text())
+    for a in caps["annotations"]:
+        if a["image_id"] in gt:
+            gt[a["image_id"]] |= coco_object_mentions(a["caption"])
+    imgs = [i for i in ann["images"] if i["id"] in gt]
     rng = random.Random(args.seed)
     sample = rng.sample(sorted(imgs, key=lambda i: i["id"]), args.images)
     files = [i["file_name"] for i in sample]
@@ -103,7 +109,7 @@ def main() -> None:
     summary = {
         "config": {"run_id": run_id, "images": len(captions), "seed": args.seed, "policy": "default (untuned)",
                    "models": {c: getattr(reg, c).info.model_dump() for c in ("detector", "grounder", "verifier", "generator")},
-                   "note": "Labels from incomplete COCO annotations; generator and verifier share SmolVLM weights."},
+                   "note": "Labels = COCO instance annotations + objects named in the 5 reference captions (still incomplete); generator and verifier share SmolVLM weights."},
         "chair_raw": raw,
         "chair_after_filtering": {"chair_i": hallucinated_kept / kept_mentions if kept_mentions else None,
                                   "objects_mentioned": kept_mentions},
@@ -114,12 +120,16 @@ def main() -> None:
         for r in rows:
             fh.write(json.dumps(r) + "\n")
     o = report["overall"]
+
+    def f3(x: float | None) -> str:
+        return "—" if x is None else f"{x:.3f}"
+
     md = [f"# Generate-and-verify with CHAIR labels — {run_id}", "", summary["config"]["note"], "",
           f"- Images: {len(captions)}; object-existence claims from generated captions: {int(o['n'])}",
-          f"- Raw captions: CHAIR-i = {raw['chair_i']:.3f}, CHAIR-s = {raw['chair_s']:.3f} ({int(raw['objects_mentioned'])} mentions)",
-          f"- After removing verifier-contradicted mentions: CHAIR-i = {summary['chair_after_filtering']['chair_i']:.3f} "
+          f"- Raw captions: CHAIR-i = {f3(raw['chair_i'])}, CHAIR-s = {f3(raw['chair_s'])} ({int(raw['objects_mentioned'])} mentions)",
+          f"- After removing verifier-contradicted mentions: CHAIR-i = {f3(summary['chair_after_filtering']['chair_i'])} "
           f"({kept_mentions} mentions kept)",
-          f"- EAV-SA (default thresholds): coverage {o['coverage']:.3f}, accuracy on covered {o['accuracy_covered']:.3f}, "
+          f"- EAV-SA (default thresholds): coverage {f3(o['coverage'])}, accuracy on covered {f3(o['accuracy_covered'])}, "
           f"hallucination precision {o['hallucination_precision']}, recall {o['hallucination_recall']}, "
           f"effective recall {o['hallucination_recall_effective']}",
           f"- Confusion (rows gold): {report['confusion_matrix']}", f"- Runtime: {summary['seconds']} s"]

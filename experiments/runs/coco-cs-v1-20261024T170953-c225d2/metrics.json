@@ -1,0 +1,2229 @@
+{
+  "config": {
+    "experiment": "coco-cs-v1",
+    "run_id": "coco-cs-v1-20261024T170953-c225d2",
+    "seed": 13,
+    "n_boot": 1000,
+    "min_coverage": 0.6,
+    "val_fraction": 0.3,
+    "systems": {
+      "vlm_only": {
+        "name": "vlm_only",
+        "kind": "vlm_only",
+        "description": "Baseline 1: VLM yes/no probability alone (threshold tuned on val).",
+        "components": [
+          "vlm"
+        ],
+        "abstention": false,
+        "disagreement": true,
+        "tune": true
+      },
+      "detector_rules": {
+        "name": "detector_rules",
+        "kind": "detector_rules",
+        "description": "Baseline 2: closed-vocabulary detector + deterministic rules (abstains outside vocabulary).",
+        "components": [
+          "detector"
+        ],
+        "abstention": false,
+        "disagreement": true,
+        "tune": true
+      },
+      "vlm_grounding": {
+        "name": "vlm_grounding",
+        "kind": "eav",
+        "description": "Baseline 3: VLM + independent open-vocabulary grounding (forced decision).",
+        "components": [
+          "vlm",
+          "grounding",
+          "geometry",
+          "color"
+        ],
+        "abstention": false,
+        "disagreement": true,
+        "tune": true
+      },
+      "full": {
+        "name": "full",
+        "kind": "eav",
+        "description": "Baseline 4: full evidence pipeline, forced binary decision (no abstention).",
+        "components": [
+          "detector",
+          "grounding",
+          "vlm",
+          "color",
+          "geometry"
+        ],
+        "abstention": false,
+        "disagreement": true,
+        "tune": true
+      },
+      "eav_sa": {
+        "name": "eav_sa",
+        "kind": "eav",
+        "description": "Method: full pipeline with uncertainty-aware selective abstention (EAV-SA).",
+        "components": [
+          "detector",
+          "grounding",
+          "vlm",
+          "color",
+          "geometry"
+        ],
+        "abstention": true,
+        "disagreement": true,
+        "tune": true
+      },
+      "eav_sa_default": {
+        "name": "eav_sa_default",
+        "kind": "eav",
+        "description": "EAV-SA with default (untuned, pre-declared) thresholds.",
+        "components": [
+          "detector",
+          "grounding",
+          "vlm",
+          "color",
+          "geometry"
+        ],
+        "abstention": true,
+        "disagreement": true,
+        "tune": false
+      },
+      "ablate_no_grounding": {
+        "name": "ablate_no_grounding",
+        "kind": "eav",
+        "description": "Ablation: EAV-SA without grounding.",
+        "components": [
+          "detector",
+          "vlm",
+          "color",
+          "geometry"
+        ],
+        "abstention": true,
+        "disagreement": true,
+        "tune": true
+      },
+      "ablate_no_detector": {
+        "name": "ablate_no_detector",
+        "kind": "eav",
+        "description": "Ablation: EAV-SA without the closed-vocabulary detector.",
+        "components": [
+          "grounding",
+          "vlm",
+          "color",
+          "geometry"
+        ],
+        "abstention": true,
+        "disagreement": true,
+        "tune": true
+      },
+      "ablate_no_disagreement": {
+        "name": "ablate_no_disagreement",
+        "kind": "eav",
+        "description": "Ablation: EAV-SA without cross-source disagreement analysis.",
+        "components": [
+          "detector",
+          "grounding",
+          "vlm",
+          "color",
+          "geometry"
+        ],
+        "abstention": true,
+        "disagreement": false,
+        "tune": true
+      },
+      "ablate_no_vlm": {
+        "name": "ablate_no_vlm",
+        "kind": "eav",
+        "description": "Ablation: EAV-SA without the VLM (localizers + rules only).",
+        "components": [
+          "detector",
+          "grounding",
+          "color",
+          "geometry"
+        ],
+        "abstention": true,
+        "disagreement": true,
+        "tune": true
+      }
+    },
+    "grid": {
+      "vlm_strong": [
+        0.75,
+        0.85,
+        0.95
+      ],
+      "detector_strong": [
+        0.4,
+        0.5,
+        0.6
+      ],
+      "grounding_strong": [
+        0.35,
+        0.45,
+        0.55
+      ],
+      "decision_threshold": [
+        0.25,
+        0.35,
+        0.5
+      ]
+    },
+    "datasets": [
+      "coco-count-spatial"
+    ],
+    "dataset_versions": [
+      "instances_val2014"
+    ],
+    "n_examples": 454,
+    "n_cached": 454,
+    "split_label_counts": {
+      "test": {
+        "SUPPORTED": 162,
+        "CONTRADICTED": 162
+      },
+      "val": {
+        "SUPPORTED": 65,
+        "CONTRADICTED": 65
+      }
+    },
+    "subsets": [
+      "count",
+      "spatial"
+    ],
+    "simulated": false,
+    "models": {
+      "detector": {
+        "component": "detector",
+        "name": "ultralytics/yolo11n.pt",
+        "version": "ultralytics-8.4.184+sha256:0ebbc80d4a76",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      },
+      "grounder": {
+        "component": "grounding",
+        "name": "IDEA-Research/grounding-dino-tiny",
+        "version": "transformers-4.57.6",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      },
+      "verifier": {
+        "component": "vlm_verifier",
+        "name": "HuggingFaceTB/SmolVLM-500M-Instruct",
+        "version": "transformers-4.57.6+tiling=off",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      }
+    },
+    "environment": {
+      "python": "3.12.14",
+      "platform": "macOS-27.0.1-arm64-arm-64bit",
+      "machine": "arm64"
+    },
+    "evidence_cache": "experiments/cache/coco-count-spatial__ultralytics_yolo11n.pt-IDEA-Research_grounding-dino-tiny-HuggingFaceTB_SmolVLM-500M-Instruct.jsonl"
+  },
+  "metrics": {
+    "vlm_only": {
+      "description": "Baseline 1: VLM yes/no probability alone (threshold tuned on val).",
+      "selected_params": {
+        "tau": 0.35
+      },
+      "val_objective": 0.6358543417366946,
+      "calibrator": null,
+      "overall": {
+        "n": 324.0,
+        "n_covered": 324.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.5802469135802469,
+        "accuracy_effective": 0.5802469135802469,
+        "supported_precision": 0.5866666666666667,
+        "supported_recall": 0.5432098765432098,
+        "supported_f1": 0.5641025641025641,
+        "supported_recall_effective": 0.5432098765432098,
+        "hallucination_precision": 0.5747126436781609,
+        "hallucination_recall": 0.6172839506172839,
+        "hallucination_f1": 0.5952380952380951,
+        "hallucination_recall_effective": 0.6172839506172839,
+        "macro_f1": 0.5796703296703296,
+        "micro_f1": 0.5802469135802469,
+        "false_positive_rate": 0.4567901234567901,
+        "false_negative_rate": 0.38271604938271603,
+        "mean_latency_ms": 433.1893518518519
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.5419750874579212,
+          "high": 0.6202799401625521
+        },
+        "accuracy_covered": {
+          "low": 0.5426829268292683,
+          "high": 0.6204819277108434
+        },
+        "coverage": {
+          "low": 1.0,
+          "high": 1.0
+        },
+        "hallucination_f1": {
+          "low": 0.5502958579881657,
+          "high": 0.6411764705882352
+        },
+        "accuracy_effective": {
+          "low": 0.5426829268292683,
+          "high": 0.6204819277108434
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 88,
+          "CONTRADICTED": 74,
+          "ABSTAIN": 0
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 62,
+          "CONTRADICTED": 100,
+          "ABSTAIN": 0
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 286.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.5804195804195804,
+          "accuracy_effective": 0.5804195804195804,
+          "supported_precision": 0.592,
+          "supported_recall": 0.5174825174825175,
+          "supported_f1": 0.5522388059701492,
+          "supported_recall_effective": 0.5174825174825175,
+          "hallucination_precision": 0.5714285714285714,
+          "hallucination_recall": 0.6433566433566433,
+          "hallucination_f1": 0.6052631578947368,
+          "hallucination_recall_effective": 0.6433566433566433,
+          "macro_f1": 0.578750981932443,
+          "micro_f1": 0.5804195804195804,
+          "false_positive_rate": 0.4825174825174825,
+          "false_negative_rate": 0.35664335664335667,
+          "mean_latency_ms": 428.4606993006993
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 38.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.5789473684210527,
+          "accuracy_effective": 0.5789473684210527,
+          "supported_precision": 0.56,
+          "supported_recall": 0.7368421052631579,
+          "supported_f1": 0.6363636363636364,
+          "supported_recall_effective": 0.7368421052631579,
+          "hallucination_precision": 0.6153846153846154,
+          "hallucination_recall": 0.42105263157894735,
+          "hallucination_f1": 0.5,
+          "hallucination_recall_effective": 0.42105263157894735,
+          "macro_f1": 0.5681818181818181,
+          "micro_f1": 0.5789473684210527,
+          "false_positive_rate": 0.2631578947368421,
+          "false_negative_rate": 0.5789473684210527,
+          "mean_latency_ms": 468.7786842105263
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 76.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.5657894736842105,
+        "accuracy_effective": 0.5657894736842105,
+        "supported_precision": 0.6470588235294118,
+        "supported_recall": 0.2894736842105263,
+        "supported_f1": 0.4,
+        "supported_recall_effective": 0.2894736842105263,
+        "hallucination_precision": 0.5423728813559322,
+        "hallucination_recall": 0.8421052631578947,
+        "hallucination_f1": 0.6597938144329897,
+        "hallucination_recall_effective": 0.8421052631578947,
+        "macro_f1": 0.5298969072164949,
+        "micro_f1": 0.5657894736842105,
+        "false_positive_rate": 0.7105263157894737,
+        "false_negative_rate": 0.15789473684210525,
+        "mean_latency_ms": 413.0414473684211
+      },
+      "calibration": {
+        "ece": 0.17399783950617284,
+        "brier": 0.2724153324382716,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 67,
+            "mean_prob": 0.054637313432835816,
+            "frac_supported": 0.3582089552238806
+          },
+          {
+            "bin": 1,
+            "n": 39,
+            "mean_prob": 0.15756666666666666,
+            "frac_supported": 0.4358974358974359
+          },
+          {
+            "bin": 2,
+            "n": 46,
+            "mean_prob": 0.24409130434782608,
+            "frac_supported": 0.391304347826087
+          },
+          {
+            "bin": 3,
+            "n": 45,
+            "mean_prob": 0.35140666666666664,
+            "frac_supported": 0.6
+          },
+          {
+            "bin": 4,
+            "n": 36,
+            "mean_prob": 0.4490138888888889,
+            "frac_supported": 0.4166666666666667
+          },
+          {
+            "bin": 5,
+            "n": 31,
+            "mean_prob": 0.5422645161290324,
+            "frac_supported": 0.6129032258064516
+          },
+          {
+            "bin": 6,
+            "n": 21,
+            "mean_prob": 0.6474095238095239,
+            "frac_supported": 0.5714285714285714
+          },
+          {
+            "bin": 7,
+            "n": 18,
+            "mean_prob": 0.7513000000000001,
+            "frac_supported": 0.6666666666666666
+          },
+          {
+            "bin": 8,
+            "n": 14,
+            "mean_prob": 0.8467785714285715,
+            "frac_supported": 0.8571428571428571
+          },
+          {
+            "bin": 9,
+            "n": 7,
+            "mean_prob": 0.9434571428571428,
+            "frac_supported": 0.8571428571428571
+          }
+        ]
+      }
+    },
+    "detector_rules": {
+      "description": "Baseline 2: closed-vocabulary detector + deterministic rules (abstains outside vocabulary).",
+      "selected_params": {
+        "tau": 0.55
+      },
+      "val_objective": 0.7701528318849267,
+      "calibrator": null,
+      "overall": {
+        "n": 324.0,
+        "n_covered": 298.0,
+        "coverage": 0.9197530864197531,
+        "abstention_rate": 0.08024691358024694,
+        "accuracy_covered": 0.7281879194630873,
+        "accuracy_effective": 0.6697530864197531,
+        "supported_precision": 0.9857142857142858,
+        "supported_recall": 0.46308724832214765,
+        "supported_f1": 0.6301369863013699,
+        "supported_recall_effective": 0.42592592592592593,
+        "hallucination_precision": 0.6491228070175439,
+        "hallucination_recall": 0.9932885906040269,
+        "hallucination_f1": 0.7851458885941645,
+        "hallucination_recall_effective": 0.9135802469135802,
+        "macro_f1": 0.7076414374477672,
+        "micro_f1": 0.7281879194630873,
+        "false_positive_rate": 0.5369127516778524,
+        "false_negative_rate": 0.006711409395973154,
+        "mean_latency_ms": 11.243271604938272
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.6551724137931034,
+          "high": 0.7568444627268156
+        },
+        "accuracy_covered": {
+          "low": 0.6862068965517242,
+          "high": 0.7697368421052632
+        },
+        "coverage": {
+          "low": 0.8809523809523809,
+          "high": 0.95625
+        },
+        "hallucination_f1": {
+          "low": 0.7593582887700534,
+          "high": 0.8128342245989304
+        },
+        "accuracy_effective": {
+          "low": 0.6212121212121212,
+          "high": 0.7242424242424242
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 69,
+          "CONTRADICTED": 80,
+          "ABSTAIN": 13
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 1,
+          "CONTRADICTED": 148,
+          "ABSTAIN": 13
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 286.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.7167832167832168,
+          "accuracy_effective": 0.7167832167832168,
+          "supported_precision": 0.984375,
+          "supported_recall": 0.4405594405594406,
+          "supported_f1": 0.6086956521739131,
+          "supported_recall_effective": 0.4405594405594406,
+          "hallucination_precision": 0.6396396396396397,
+          "hallucination_recall": 0.993006993006993,
+          "hallucination_f1": 0.7780821917808219,
+          "hallucination_recall_effective": 0.993006993006993,
+          "macro_f1": 0.6933889219773675,
+          "micro_f1": 0.7167832167832168,
+          "false_positive_rate": 0.5594405594405595,
+          "false_negative_rate": 0.006993006993006993,
+          "mean_latency_ms": 12.737132867132868
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 12.0,
+          "coverage": 0.3157894736842105,
+          "abstention_rate": 0.6842105263157895,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.3157894736842105,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.3157894736842105,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.3157894736842105,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 0.0
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 76.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.5789473684210527,
+        "accuracy_effective": 0.5789473684210527,
+        "supported_precision": 1.0,
+        "supported_recall": 0.15789473684210525,
+        "supported_f1": 0.2727272727272727,
+        "supported_recall_effective": 0.15789473684210525,
+        "hallucination_precision": 0.5428571428571428,
+        "hallucination_recall": 1.0,
+        "hallucination_f1": 0.7037037037037037,
+        "hallucination_recall_effective": 1.0,
+        "macro_f1": 0.4882154882154882,
+        "micro_f1": 0.5789473684210527,
+        "false_positive_rate": 0.8421052631578947,
+        "false_negative_rate": 0.0,
+        "mean_latency_ms": 12.693157894736842
+      },
+      "calibration": {
+        "ece": null,
+        "brier": null,
+        "n_calibration": 0.0
+      }
+    },
+    "vlm_grounding": {
+      "description": "Baseline 3: VLM + independent open-vocabulary grounding (forced decision).",
+      "selected_params": {
+        "vlm_strong": 0.95,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": 0.799239724400095,
+      "calibrator": {
+        "a": 4.774888804545105,
+        "b": 0.2950544189552238,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 324.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.8024691358024691,
+        "accuracy_effective": 0.8024691358024691,
+        "supported_precision": 0.7916666666666666,
+        "supported_recall": 0.8209876543209876,
+        "supported_f1": 0.8060606060606059,
+        "supported_recall_effective": 0.8209876543209876,
+        "hallucination_precision": 0.8141025641025641,
+        "hallucination_recall": 0.7839506172839507,
+        "hallucination_f1": 0.7987421383647798,
+        "hallucination_recall_effective": 0.7839506172839507,
+        "macro_f1": 0.8024013722126928,
+        "micro_f1": 0.8024691358024691,
+        "false_positive_rate": 0.17901234567901234,
+        "false_negative_rate": 0.21604938271604937,
+        "mean_latency_ms": 1262.109351851852
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.7596129151556865,
+          "high": 0.8436522826766728
+        },
+        "accuracy_covered": {
+          "low": 0.7596153846153846,
+          "high": 0.84375
+        },
+        "coverage": {
+          "low": 1.0,
+          "high": 1.0
+        },
+        "hallucination_f1": {
+          "low": 0.7508090614886732,
+          "high": 0.8408408408408408
+        },
+        "accuracy_effective": {
+          "low": 0.7596153846153846,
+          "high": 0.84375
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 133,
+          "CONTRADICTED": 29,
+          "ABSTAIN": 0
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 35,
+          "CONTRADICTED": 127,
+          "ABSTAIN": 0
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 286.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.7902097902097902,
+          "accuracy_effective": 0.7902097902097902,
+          "supported_precision": 0.782312925170068,
+          "supported_recall": 0.8041958041958042,
+          "supported_f1": 0.793103448275862,
+          "supported_recall_effective": 0.8041958041958042,
+          "hallucination_precision": 0.7985611510791367,
+          "hallucination_recall": 0.7762237762237763,
+          "hallucination_f1": 0.7872340425531915,
+          "hallucination_recall_effective": 0.7762237762237763,
+          "macro_f1": 0.7901687454145268,
+          "micro_f1": 0.7902097902097902,
+          "false_positive_rate": 0.1958041958041958,
+          "false_negative_rate": 0.22377622377622378,
+          "mean_latency_ms": 1209.1154895104894
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 38.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.8947368421052632,
+          "accuracy_effective": 0.8947368421052632,
+          "supported_precision": 0.8571428571428571,
+          "supported_recall": 0.9473684210526315,
+          "supported_f1": 0.9,
+          "supported_recall_effective": 0.9473684210526315,
+          "hallucination_precision": 0.9411764705882353,
+          "hallucination_recall": 0.8421052631578947,
+          "hallucination_f1": 0.8888888888888888,
+          "hallucination_recall_effective": 0.8421052631578947,
+          "macro_f1": 0.8944444444444444,
+          "micro_f1": 0.8947368421052632,
+          "false_positive_rate": 0.05263157894736842,
+          "false_negative_rate": 0.15789473684210525,
+          "mean_latency_ms": 1660.957894736842
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 76.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.75,
+        "accuracy_effective": 0.75,
+        "supported_precision": 0.8064516129032258,
+        "supported_recall": 0.6578947368421053,
+        "supported_f1": 0.7246376811594202,
+        "supported_recall_effective": 0.6578947368421053,
+        "hallucination_precision": 0.7111111111111111,
+        "hallucination_recall": 0.8421052631578947,
+        "hallucination_f1": 0.7710843373493975,
+        "hallucination_recall_effective": 0.8421052631578947,
+        "macro_f1": 0.7478610092544089,
+        "micro_f1": 0.75,
+        "false_positive_rate": 0.34210526315789475,
+        "false_negative_rate": 0.15789473684210525,
+        "mean_latency_ms": 1161.230394736842
+      },
+      "calibration": {
+        "ece": 0.060791248552510675,
+        "brier": 0.15058883170514742,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 37,
+            "mean_prob": 0.04675460879603446,
+            "frac_supported": 0.10810810810810811
+          },
+          {
+            "bin": 1,
+            "n": 71,
+            "mean_prob": 0.11663357011734009,
+            "frac_supported": 0.16901408450704225
+          },
+          {
+            "bin": 2,
+            "n": 44,
+            "mean_prob": 0.2870273231795548,
+            "frac_supported": 0.22727272727272727
+          },
+          {
+            "bin": 3,
+            "n": 4,
+            "mean_prob": 0.3680593865936724,
+            "frac_supported": 0.75
+          },
+          {
+            "bin": 5,
+            "n": 75,
+            "mean_prob": 0.57323308561822,
+            "frac_supported": 0.6666666666666666
+          },
+          {
+            "bin": 6,
+            "n": 2,
+            "mean_prob": 0.6471508853015546,
+            "frac_supported": 1.0
+          },
+          {
+            "bin": 8,
+            "n": 48,
+            "mean_prob": 0.8206647187038887,
+            "frac_supported": 0.8125
+          },
+          {
+            "bin": 9,
+            "n": 43,
+            "mean_prob": 0.9431353359196486,
+            "frac_supported": 0.9767441860465116
+          }
+        ]
+      }
+    },
+    "full": {
+      "description": "Baseline 4: full evidence pipeline, forced binary decision (no abstention).",
+      "selected_params": {
+        "vlm_strong": 0.75,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": 0.7665229885057472,
+      "calibrator": {
+        "a": 3.706379629009045,
+        "b": 0.29968195733381253,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 324.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.7746913580246914,
+        "accuracy_effective": 0.7746913580246914,
+        "supported_precision": 0.8739495798319328,
+        "supported_recall": 0.6419753086419753,
+        "supported_f1": 0.7402135231316725,
+        "supported_recall_effective": 0.6419753086419753,
+        "hallucination_precision": 0.7170731707317073,
+        "hallucination_recall": 0.9074074074074074,
+        "hallucination_f1": 0.8010899182561307,
+        "hallucination_recall_effective": 0.9074074074074074,
+        "macro_f1": 0.7706517206939016,
+        "micro_f1": 0.7746913580246914,
+        "false_positive_rate": 0.35802469135802467,
+        "false_negative_rate": 0.09259259259259259,
+        "mean_latency_ms": 1273.35262345679
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.7274521788795478,
+          "high": 0.8144078144078144
+        },
+        "accuracy_covered": {
+          "low": 0.7341772151898734,
+          "high": 0.8173076923076923
+        },
+        "coverage": {
+          "low": 1.0,
+          "high": 1.0
+        },
+        "hallucination_f1": {
+          "low": 0.7671957671957671,
+          "high": 0.8352941176470587
+        },
+        "accuracy_effective": {
+          "low": 0.7341772151898734,
+          "high": 0.8173076923076923
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 104,
+          "CONTRADICTED": 58,
+          "ABSTAIN": 0
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 15,
+          "CONTRADICTED": 147,
+          "ABSTAIN": 0
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 286.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.7622377622377622,
+          "accuracy_effective": 0.7622377622377622,
+          "supported_precision": 0.8787878787878788,
+          "supported_recall": 0.6083916083916084,
+          "supported_f1": 0.71900826446281,
+          "supported_recall_effective": 0.6083916083916084,
+          "hallucination_precision": 0.7005347593582888,
+          "hallucination_recall": 0.916083916083916,
+          "hallucination_f1": 0.793939393939394,
+          "hallucination_recall_effective": 0.916083916083916,
+          "macro_f1": 0.756473829201102,
+          "micro_f1": 0.7622377622377622,
+          "false_positive_rate": 0.3916083916083916,
+          "false_negative_rate": 0.08391608391608392,
+          "mean_latency_ms": 1221.8526223776223
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 38.0,
+          "coverage": 1.0,
+          "abstention_rate": 0.0,
+          "accuracy_covered": 0.868421052631579,
+          "accuracy_effective": 0.868421052631579,
+          "supported_precision": 0.85,
+          "supported_recall": 0.8947368421052632,
+          "supported_f1": 0.8717948717948718,
+          "supported_recall_effective": 0.8947368421052632,
+          "hallucination_precision": 0.8888888888888888,
+          "hallucination_recall": 0.8421052631578947,
+          "hallucination_f1": 0.8648648648648649,
+          "hallucination_recall_effective": 0.8421052631578947,
+          "macro_f1": 0.8683298683298684,
+          "micro_f1": 0.868421052631579,
+          "false_positive_rate": 0.10526315789473684,
+          "false_negative_rate": 0.15789473684210525,
+          "mean_latency_ms": 1660.957894736842
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 76.0,
+        "coverage": 1.0,
+        "abstention_rate": 0.0,
+        "accuracy_covered": 0.6578947368421053,
+        "accuracy_effective": 0.6578947368421053,
+        "supported_precision": 0.9285714285714286,
+        "supported_recall": 0.34210526315789475,
+        "supported_f1": 0.5,
+        "supported_recall_effective": 0.34210526315789475,
+        "hallucination_precision": 0.5967741935483871,
+        "hallucination_recall": 0.9736842105263158,
+        "hallucination_f1": 0.74,
+        "hallucination_recall_effective": 0.9736842105263158,
+        "macro_f1": 0.62,
+        "micro_f1": 0.6578947368421053,
+        "false_positive_rate": 0.6578947368421053,
+        "false_negative_rate": 0.02631578947368421,
+        "mean_latency_ms": 1173.923552631579
+      },
+      "calibration": {
+        "ece": 0.06737437324471901,
+        "brier": 0.14484522275241035,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 8,
+            "mean_prob": 0.05776555085932809,
+            "frac_supported": 0.0
+          },
+          {
+            "bin": 1,
+            "n": 89,
+            "mean_prob": 0.13793040747813026,
+            "frac_supported": 0.11235955056179775
+          },
+          {
+            "bin": 2,
+            "n": 46,
+            "mean_prob": 0.250653910569563,
+            "frac_supported": 0.2608695652173913
+          },
+          {
+            "bin": 3,
+            "n": 33,
+            "mean_prob": 0.31968383663705036,
+            "frac_supported": 0.6363636363636364
+          },
+          {
+            "bin": 4,
+            "n": 25,
+            "mean_prob": 0.44447595214846986,
+            "frac_supported": 0.44
+          },
+          {
+            "bin": 5,
+            "n": 9,
+            "mean_prob": 0.5540069252904131,
+            "frac_supported": 0.7777777777777778
+          },
+          {
+            "bin": 6,
+            "n": 15,
+            "mean_prob": 0.6769802098911272,
+            "frac_supported": 0.5333333333333333
+          },
+          {
+            "bin": 7,
+            "n": 10,
+            "mean_prob": 0.7653279775703565,
+            "frac_supported": 0.9
+          },
+          {
+            "bin": 8,
+            "n": 31,
+            "mean_prob": 0.8607384967862857,
+            "frac_supported": 0.8709677419354839
+          },
+          {
+            "bin": 9,
+            "n": 58,
+            "mean_prob": 0.9443681671431589,
+            "frac_supported": 0.9827586206896551
+          }
+        ]
+      }
+    },
+    "eav_sa": {
+      "description": "Method: full pipeline with uncertainty-aware selective abstention (EAV-SA).",
+      "selected_params": {
+        "vlm_strong": 0.75,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": -0.4538461538461539,
+      "calibrator": {
+        "a": 3.706379629009045,
+        "b": 0.29968195733381253,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 198.0,
+        "coverage": 0.6111111111111112,
+        "abstention_rate": 0.38888888888888884,
+        "accuracy_covered": 0.8080808080808081,
+        "accuracy_effective": 0.49382716049382713,
+        "supported_precision": 0.9452054794520548,
+        "supported_recall": 0.6699029126213593,
+        "supported_f1": 0.7840909090909092,
+        "supported_recall_effective": 0.42592592592592593,
+        "hallucination_precision": 0.728,
+        "hallucination_recall": 0.9578947368421052,
+        "hallucination_f1": 0.8272727272727272,
+        "hallucination_recall_effective": 0.5617283950617284,
+        "macro_f1": 0.8056818181818182,
+        "micro_f1": 0.8080808080808081,
+        "false_positive_rate": 0.3300970873786408,
+        "false_negative_rate": 0.042105263157894736,
+        "mean_latency_ms": 1273.35262345679
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.7542781685396287,
+          "high": 0.8556701030927835
+        },
+        "accuracy_covered": {
+          "low": 0.7606382978723404,
+          "high": 0.8557213930348259
+        },
+        "coverage": {
+          "low": 0.549079754601227,
+          "high": 0.6729559748427673
+        },
+        "hallucination_f1": {
+          "low": 0.7899159663865546,
+          "high": 0.8666666666666666
+        },
+        "accuracy_effective": {
+          "low": 0.4375,
+          "high": 0.550314465408805
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 69,
+          "CONTRADICTED": 34,
+          "ABSTAIN": 59
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 4,
+          "CONTRADICTED": 91,
+          "ABSTAIN": 67
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 170.0,
+          "coverage": 0.5944055944055944,
+          "abstention_rate": 0.4055944055944056,
+          "accuracy_covered": 0.7764705882352941,
+          "accuracy_effective": 0.46153846153846156,
+          "supported_precision": 0.9344262295081968,
+          "supported_recall": 0.6263736263736264,
+          "supported_f1": 0.7500000000000001,
+          "supported_recall_effective": 0.3986013986013986,
+          "hallucination_precision": 0.6880733944954128,
+          "hallucination_recall": 0.9493670886075949,
+          "hallucination_f1": 0.797872340425532,
+          "hallucination_recall_effective": 0.5244755244755245,
+          "macro_f1": 0.7739361702127661,
+          "micro_f1": 0.7764705882352941,
+          "false_positive_rate": 0.37362637362637363,
+          "false_negative_rate": 0.05063291139240506,
+          "mean_latency_ms": 1221.8526223776223
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 28.0,
+          "coverage": 0.7368421052631579,
+          "abstention_rate": 0.26315789473684215,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.7368421052631579,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.631578947368421,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.8421052631578947,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 1660.957894736842
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 47.0,
+        "coverage": 0.618421052631579,
+        "abstention_rate": 0.381578947368421,
+        "accuracy_covered": 0.6595744680851063,
+        "accuracy_effective": 0.40789473684210525,
+        "supported_precision": 1.0,
+        "supported_recall": 0.2,
+        "supported_f1": 0.33333333333333337,
+        "supported_recall_effective": 0.10526315789473684,
+        "hallucination_precision": 0.627906976744186,
+        "hallucination_recall": 1.0,
+        "hallucination_f1": 0.7714285714285715,
+        "hallucination_recall_effective": 0.7105263157894737,
+        "macro_f1": 0.5523809523809524,
+        "micro_f1": 0.6595744680851063,
+        "false_positive_rate": 0.8,
+        "false_negative_rate": 0.0,
+        "mean_latency_ms": 1173.923552631579
+      },
+      "calibration": {
+        "ece": 0.06737437324471901,
+        "brier": 0.14484522275241035,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 8,
+            "mean_prob": 0.05776555085932809,
+            "frac_supported": 0.0
+          },
+          {
+            "bin": 1,
+            "n": 89,
+            "mean_prob": 0.13793040747813026,
+            "frac_supported": 0.11235955056179775
+          },
+          {
+            "bin": 2,
+            "n": 46,
+            "mean_prob": 0.250653910569563,
+            "frac_supported": 0.2608695652173913
+          },
+          {
+            "bin": 3,
+            "n": 33,
+            "mean_prob": 0.31968383663705036,
+            "frac_supported": 0.6363636363636364
+          },
+          {
+            "bin": 4,
+            "n": 25,
+            "mean_prob": 0.44447595214846986,
+            "frac_supported": 0.44
+          },
+          {
+            "bin": 5,
+            "n": 9,
+            "mean_prob": 0.5540069252904131,
+            "frac_supported": 0.7777777777777778
+          },
+          {
+            "bin": 6,
+            "n": 15,
+            "mean_prob": 0.6769802098911272,
+            "frac_supported": 0.5333333333333333
+          },
+          {
+            "bin": 7,
+            "n": 10,
+            "mean_prob": 0.7653279775703565,
+            "frac_supported": 0.9
+          },
+          {
+            "bin": 8,
+            "n": 31,
+            "mean_prob": 0.8607384967862857,
+            "frac_supported": 0.8709677419354839
+          },
+          {
+            "bin": 9,
+            "n": 58,
+            "mean_prob": 0.9443681671431589,
+            "frac_supported": 0.9827586206896551
+          }
+        ]
+      }
+    },
+    "eav_sa_default": {
+      "description": "EAV-SA with default (untuned, pre-declared) thresholds.",
+      "selected_params": {},
+      "val_objective": null,
+      "calibrator": {
+        "a": 3.898461691160444,
+        "b": 0.29731751648848515,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 143.0,
+        "coverage": 0.44135802469135804,
+        "abstention_rate": 0.558641975308642,
+        "accuracy_covered": 0.8881118881118881,
+        "accuracy_effective": 0.39197530864197533,
+        "supported_precision": 0.9855072463768116,
+        "supported_recall": 0.8192771084337349,
+        "supported_f1": 0.8947368421052633,
+        "supported_recall_effective": 0.41975308641975306,
+        "hallucination_precision": 0.7972972972972973,
+        "hallucination_recall": 0.9833333333333333,
+        "hallucination_f1": 0.8805970149253731,
+        "hallucination_recall_effective": 0.36419753086419754,
+        "macro_f1": 0.8876669285153183,
+        "micro_f1": 0.8881118881118881,
+        "false_positive_rate": 0.18072289156626506,
+        "false_negative_rate": 0.016666666666666666,
+        "mean_latency_ms": 1273.35262345679
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.836339590757136,
+          "high": 0.9353520186853521
+        },
+        "accuracy_covered": {
+          "low": 0.8363636363636363,
+          "high": 0.9366197183098591
+        },
+        "coverage": {
+          "low": 0.38311688311688313,
+          "high": 0.4971590909090909
+        },
+        "hallucination_f1": {
+          "low": 0.8282828282828282,
+          "high": 0.9315068493150686
+        },
+        "accuracy_effective": {
+          "low": 0.340625,
+          "high": 0.4409937888198758
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 68,
+          "CONTRADICTED": 15,
+          "ABSTAIN": 79
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 1,
+          "CONTRADICTED": 59,
+          "ABSTAIN": 102
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 118.0,
+          "coverage": 0.4125874125874126,
+          "abstention_rate": 0.5874125874125874,
+          "accuracy_covered": 0.864406779661017,
+          "accuracy_effective": 0.35664335664335667,
+          "supported_precision": 0.9827586206896551,
+          "supported_recall": 0.7916666666666666,
+          "supported_f1": 0.8769230769230769,
+          "supported_recall_effective": 0.3986013986013986,
+          "hallucination_precision": 0.75,
+          "hallucination_recall": 0.9782608695652174,
+          "hallucination_f1": 0.849056603773585,
+          "hallucination_recall_effective": 0.3146853146853147,
+          "macro_f1": 0.8629898403483309,
+          "micro_f1": 0.864406779661017,
+          "false_positive_rate": 0.20833333333333334,
+          "false_negative_rate": 0.021739130434782608,
+          "mean_latency_ms": 1221.8526223776223
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 25.0,
+          "coverage": 0.6578947368421053,
+          "abstention_rate": 0.3421052631578947,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.6578947368421053,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.5789473684210527,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.7368421052631579,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 1660.957894736842
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 30.0,
+        "coverage": 0.39473684210526316,
+        "abstention_rate": 0.6052631578947368,
+        "accuracy_covered": 0.7333333333333333,
+        "accuracy_effective": 0.2894736842105263,
+        "supported_precision": 1.0,
+        "supported_recall": 0.3333333333333333,
+        "supported_f1": 0.5,
+        "supported_recall_effective": 0.10526315789473684,
+        "hallucination_precision": 0.6923076923076923,
+        "hallucination_recall": 1.0,
+        "hallucination_f1": 0.8181818181818181,
+        "hallucination_recall_effective": 0.47368421052631576,
+        "macro_f1": 0.6590909090909091,
+        "micro_f1": 0.7333333333333333,
+        "false_positive_rate": 0.6666666666666666,
+        "false_negative_rate": 0.0,
+        "mean_latency_ms": 1173.923552631579
+      },
+      "calibration": {
+        "ece": 0.07831178000080294,
+        "brier": 0.14357974781215338,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 7,
+            "mean_prob": 0.05603372830633202,
+            "frac_supported": 0.0
+          },
+          {
+            "bin": 1,
+            "n": 83,
+            "mean_prob": 0.13766442684063335,
+            "frac_supported": 0.10843373493975904
+          },
+          {
+            "bin": 2,
+            "n": 65,
+            "mean_prob": 0.2474786885142346,
+            "frac_supported": 0.35384615384615387
+          },
+          {
+            "bin": 3,
+            "n": 15,
+            "mean_prob": 0.33384049719928277,
+            "frac_supported": 0.3333333333333333
+          },
+          {
+            "bin": 4,
+            "n": 28,
+            "mean_prob": 0.4269658665481602,
+            "frac_supported": 0.5714285714285714
+          },
+          {
+            "bin": 5,
+            "n": 13,
+            "mean_prob": 0.5589526722540323,
+            "frac_supported": 0.6923076923076923
+          },
+          {
+            "bin": 6,
+            "n": 9,
+            "mean_prob": 0.6757279192749137,
+            "frac_supported": 0.4444444444444444
+          },
+          {
+            "bin": 7,
+            "n": 15,
+            "mean_prob": 0.7822712793639461,
+            "frac_supported": 0.6
+          },
+          {
+            "bin": 8,
+            "n": 18,
+            "mean_prob": 0.8478165466397187,
+            "frac_supported": 0.9444444444444444
+          },
+          {
+            "bin": 9,
+            "n": 71,
+            "mean_prob": 0.939441593408286,
+            "frac_supported": 0.9859154929577465
+          }
+        ]
+      }
+    },
+    "ablate_no_grounding": {
+      "description": "Ablation: EAV-SA without grounding.",
+      "selected_params": {
+        "vlm_strong": 0.75,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": -0.4538461538461539,
+      "calibrator": {
+        "a": 2.2662267886614207,
+        "b": 0.17260425664380646,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 198.0,
+        "coverage": 0.6111111111111112,
+        "abstention_rate": 0.38888888888888884,
+        "accuracy_covered": 0.8080808080808081,
+        "accuracy_effective": 0.49382716049382713,
+        "supported_precision": 0.9452054794520548,
+        "supported_recall": 0.6699029126213593,
+        "supported_f1": 0.7840909090909092,
+        "supported_recall_effective": 0.42592592592592593,
+        "hallucination_precision": 0.728,
+        "hallucination_recall": 0.9578947368421052,
+        "hallucination_f1": 0.8272727272727272,
+        "hallucination_recall_effective": 0.5617283950617284,
+        "macro_f1": 0.8056818181818182,
+        "micro_f1": 0.8080808080808081,
+        "false_positive_rate": 0.3300970873786408,
+        "false_negative_rate": 0.042105263157894736,
+        "mean_latency_ms": 444.43262345679017
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.7542781685396287,
+          "high": 0.8556701030927835
+        },
+        "accuracy_covered": {
+          "low": 0.7606382978723404,
+          "high": 0.8557213930348259
+        },
+        "coverage": {
+          "low": 0.549079754601227,
+          "high": 0.6729559748427673
+        },
+        "hallucination_f1": {
+          "low": 0.7899159663865546,
+          "high": 0.8666666666666666
+        },
+        "accuracy_effective": {
+          "low": 0.4375,
+          "high": 0.550314465408805
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 69,
+          "CONTRADICTED": 34,
+          "ABSTAIN": 59
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 4,
+          "CONTRADICTED": 91,
+          "ABSTAIN": 67
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 170.0,
+          "coverage": 0.5944055944055944,
+          "abstention_rate": 0.4055944055944056,
+          "accuracy_covered": 0.7764705882352941,
+          "accuracy_effective": 0.46153846153846156,
+          "supported_precision": 0.9344262295081968,
+          "supported_recall": 0.6263736263736264,
+          "supported_f1": 0.7500000000000001,
+          "supported_recall_effective": 0.3986013986013986,
+          "hallucination_precision": 0.6880733944954128,
+          "hallucination_recall": 0.9493670886075949,
+          "hallucination_f1": 0.797872340425532,
+          "hallucination_recall_effective": 0.5244755244755245,
+          "macro_f1": 0.7739361702127661,
+          "micro_f1": 0.7764705882352941,
+          "false_positive_rate": 0.37362637362637363,
+          "false_negative_rate": 0.05063291139240506,
+          "mean_latency_ms": 441.1978321678322
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 28.0,
+          "coverage": 0.7368421052631579,
+          "abstention_rate": 0.26315789473684215,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.7368421052631579,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.631578947368421,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.8421052631578947,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 468.7786842105263
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 47.0,
+        "coverage": 0.618421052631579,
+        "abstention_rate": 0.381578947368421,
+        "accuracy_covered": 0.6595744680851063,
+        "accuracy_effective": 0.40789473684210525,
+        "supported_precision": 1.0,
+        "supported_recall": 0.2,
+        "supported_f1": 0.33333333333333337,
+        "supported_recall_effective": 0.10526315789473684,
+        "hallucination_precision": 0.627906976744186,
+        "hallucination_recall": 1.0,
+        "hallucination_f1": 0.7714285714285715,
+        "hallucination_recall_effective": 0.7105263157894737,
+        "macro_f1": 0.5523809523809524,
+        "micro_f1": 0.6595744680851063,
+        "false_positive_rate": 0.8,
+        "false_negative_rate": 0.0,
+        "mean_latency_ms": 425.73460526315785
+      },
+      "calibration": {
+        "ece": 0.09609200416452846,
+        "brier": 0.16934515426471006,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 1,
+            "n": 8,
+            "mean_prob": 0.14931237654230622,
+            "frac_supported": 0.0
+          },
+          {
+            "bin": 2,
+            "n": 126,
+            "mean_prob": 0.2316866445868945,
+            "frac_supported": 0.29365079365079366
+          },
+          {
+            "bin": 3,
+            "n": 47,
+            "mean_prob": 0.3517044326401394,
+            "frac_supported": 0.23404255319148937
+          },
+          {
+            "bin": 4,
+            "n": 14,
+            "mean_prob": 0.4251105676278963,
+            "frac_supported": 0.5
+          },
+          {
+            "bin": 5,
+            "n": 24,
+            "mean_prob": 0.542214760471205,
+            "frac_supported": 0.4166666666666667
+          },
+          {
+            "bin": 6,
+            "n": 11,
+            "mean_prob": 0.6312367293459803,
+            "frac_supported": 0.9090909090909091
+          },
+          {
+            "bin": 7,
+            "n": 31,
+            "mean_prob": 0.741544720059179,
+            "frac_supported": 0.9032258064516129
+          },
+          {
+            "bin": 8,
+            "n": 46,
+            "mean_prob": 0.8454957053751199,
+            "frac_supported": 0.9130434782608695
+          },
+          {
+            "bin": 9,
+            "n": 17,
+            "mean_prob": 0.9197408406936232,
+            "frac_supported": 1.0
+          }
+        ]
+      }
+    },
+    "ablate_no_detector": {
+      "description": "Ablation: EAV-SA without the closed-vocabulary detector.",
+      "selected_params": {
+        "vlm_strong": 0.75,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": -0.4769230769230769,
+      "calibrator": {
+        "a": 3.3643803496707387,
+        "b": 0.3078142484966884,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 182.0,
+        "coverage": 0.5617283950617284,
+        "abstention_rate": 0.43827160493827155,
+        "accuracy_covered": 0.7307692307692307,
+        "accuracy_effective": 0.4104938271604938,
+        "supported_precision": 0.8536585365853658,
+        "supported_recall": 0.44871794871794873,
+        "supported_f1": 0.5882352941176471,
+        "supported_recall_effective": 0.21604938271604937,
+        "hallucination_precision": 0.6950354609929078,
+        "hallucination_recall": 0.9423076923076923,
+        "hallucination_f1": 0.7999999999999999,
+        "hallucination_recall_effective": 0.6049382716049383,
+        "macro_f1": 0.6941176470588235,
+        "micro_f1": 0.7307692307692307,
+        "false_positive_rate": 0.5512820512820513,
+        "false_negative_rate": 0.057692307692307696,
+        "mean_latency_ms": 1262.109351851852
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.6303418803418803,
+          "high": 0.7543103448275862
+        },
+        "accuracy_covered": {
+          "low": 0.6804123711340206,
+          "high": 0.7816091954022989
+        },
+        "coverage": {
+          "low": 0.5,
+          "high": 0.6273885350318471
+        },
+        "hallucination_f1": {
+          "low": 0.7610619469026548,
+          "high": 0.8366533864541833
+        },
+        "accuracy_effective": {
+          "low": 0.35714285714285715,
+          "high": 0.4625
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 35,
+          "CONTRADICTED": 43,
+          "ABSTAIN": 84
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 6,
+          "CONTRADICTED": 98,
+          "ABSTAIN": 58
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 154.0,
+          "coverage": 0.5384615384615384,
+          "abstention_rate": 0.46153846153846156,
+          "accuracy_covered": 0.6818181818181818,
+          "accuracy_effective": 0.36713286713286714,
+          "supported_precision": 0.7931034482758621,
+          "supported_recall": 0.3484848484848485,
+          "supported_f1": 0.4842105263157895,
+          "supported_recall_effective": 0.16083916083916083,
+          "hallucination_precision": 0.656,
+          "hallucination_recall": 0.9318181818181818,
+          "hallucination_f1": 0.7699530516431925,
+          "hallucination_recall_effective": 0.5734265734265734,
+          "macro_f1": 0.627081788979491,
+          "micro_f1": 0.6818181818181818,
+          "false_positive_rate": 0.6515151515151515,
+          "false_negative_rate": 0.06818181818181818,
+          "mean_latency_ms": 1209.1154895104894
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 28.0,
+          "coverage": 0.7368421052631579,
+          "abstention_rate": 0.26315789473684215,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.7368421052631579,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.631578947368421,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.8421052631578947,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 1660.957894736842
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 54.0,
+        "coverage": 0.7105263157894737,
+        "abstention_rate": 0.2894736842105263,
+        "accuracy_covered": 0.5925925925925926,
+        "accuracy_effective": 0.42105263157894735,
+        "supported_precision": 0.6666666666666666,
+        "supported_recall": 0.08695652173913043,
+        "supported_f1": 0.15384615384615383,
+        "supported_recall_effective": 0.05263157894736842,
+        "hallucination_precision": 0.5882352941176471,
+        "hallucination_recall": 0.967741935483871,
+        "hallucination_f1": 0.7317073170731707,
+        "hallucination_recall_effective": 0.7894736842105263,
+        "macro_f1": 0.4427767354596623,
+        "micro_f1": 0.5925925925925926,
+        "false_positive_rate": 0.9130434782608695,
+        "false_negative_rate": 0.03225806451612903,
+        "mean_latency_ms": 1161.230394736842
+      },
+      "calibration": {
+        "ece": 0.08375077735900562,
+        "brier": 0.1692696555776831,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 74,
+            "mean_prob": 0.09577161847108458,
+            "frac_supported": 0.06756756756756757
+          },
+          {
+            "bin": 1,
+            "n": 25,
+            "mean_prob": 0.13656931736891703,
+            "frac_supported": 0.28
+          },
+          {
+            "bin": 2,
+            "n": 9,
+            "mean_prob": 0.20191376965258157,
+            "frac_supported": 0.4444444444444444
+          },
+          {
+            "bin": 3,
+            "n": 78,
+            "mean_prob": 0.3686733952562158,
+            "frac_supported": 0.46153846153846156
+          },
+          {
+            "bin": 4,
+            "n": 5,
+            "mean_prob": 0.4315919268859371,
+            "frac_supported": 0.8
+          },
+          {
+            "bin": 5,
+            "n": 34,
+            "mean_prob": 0.5763516545226409,
+            "frac_supported": 0.6764705882352942
+          },
+          {
+            "bin": 6,
+            "n": 4,
+            "mean_prob": 0.6571926564039414,
+            "frac_supported": 1.0
+          },
+          {
+            "bin": 7,
+            "n": 51,
+            "mean_prob": 0.7596386393553531,
+            "frac_supported": 0.7058823529411765
+          },
+          {
+            "bin": 8,
+            "n": 21,
+            "mean_prob": 0.8841661008135491,
+            "frac_supported": 0.9523809523809523
+          },
+          {
+            "bin": 9,
+            "n": 23,
+            "mean_prob": 0.9458809646819428,
+            "frac_supported": 1.0
+          }
+        ]
+      }
+    },
+    "ablate_no_disagreement": {
+      "description": "Ablation: EAV-SA without cross-source disagreement analysis.",
+      "selected_params": {
+        "vlm_strong": 0.75,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": -0.43846153846153846,
+      "calibrator": {
+        "a": 3.706379629009045,
+        "b": 0.29968195733381253,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 202.0,
+        "coverage": 0.6234567901234568,
+        "abstention_rate": 0.3765432098765432,
+        "accuracy_covered": 0.8118811881188119,
+        "accuracy_effective": 0.5061728395061729,
+        "supported_precision": 0.948051948051948,
+        "supported_recall": 0.6822429906542056,
+        "supported_f1": 0.7934782608695651,
+        "supported_recall_effective": 0.4506172839506173,
+        "hallucination_precision": 0.728,
+        "hallucination_recall": 0.9578947368421052,
+        "hallucination_f1": 0.8272727272727272,
+        "hallucination_recall_effective": 0.5617283950617284,
+        "macro_f1": 0.8103754940711461,
+        "micro_f1": 0.8118811881188119,
+        "false_positive_rate": 0.3177570093457944,
+        "false_negative_rate": 0.042105263157894736,
+        "mean_latency_ms": 1273.35262345679
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.760059612518629,
+          "high": 0.8591878310471275
+        },
+        "accuracy_covered": {
+          "low": 0.7638190954773869,
+          "high": 0.859375
+        },
+        "coverage": {
+          "low": 0.565625,
+          "high": 0.684375
+        },
+        "hallucination_f1": {
+          "low": 0.7899159663865546,
+          "high": 0.8666666666666666
+        },
+        "accuracy_effective": {
+          "low": 0.4528301886792453,
+          "high": 0.5596590909090909
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 73,
+          "CONTRADICTED": 34,
+          "ABSTAIN": 55
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 4,
+          "CONTRADICTED": 91,
+          "ABSTAIN": 67
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 174.0,
+          "coverage": 0.6083916083916084,
+          "abstention_rate": 0.39160839160839156,
+          "accuracy_covered": 0.7816091954022989,
+          "accuracy_effective": 0.4755244755244755,
+          "supported_precision": 0.9384615384615385,
+          "supported_recall": 0.6421052631578947,
+          "supported_f1": 0.7625,
+          "supported_recall_effective": 0.42657342657342656,
+          "hallucination_precision": 0.6880733944954128,
+          "hallucination_recall": 0.9493670886075949,
+          "hallucination_f1": 0.797872340425532,
+          "hallucination_recall_effective": 0.5244755244755245,
+          "macro_f1": 0.7801861702127659,
+          "micro_f1": 0.7816091954022989,
+          "false_positive_rate": 0.35789473684210527,
+          "false_negative_rate": 0.05063291139240506,
+          "mean_latency_ms": 1221.8526223776223
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 28.0,
+          "coverage": 0.7368421052631579,
+          "abstention_rate": 0.26315789473684215,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.7368421052631579,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.631578947368421,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.8421052631578947,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 1660.957894736842
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 48.0,
+        "coverage": 0.631578947368421,
+        "abstention_rate": 0.368421052631579,
+        "accuracy_covered": 0.6666666666666666,
+        "accuracy_effective": 0.42105263157894735,
+        "supported_precision": 1.0,
+        "supported_recall": 0.23809523809523808,
+        "supported_f1": 0.3846153846153846,
+        "supported_recall_effective": 0.13157894736842105,
+        "hallucination_precision": 0.627906976744186,
+        "hallucination_recall": 1.0,
+        "hallucination_f1": 0.7714285714285715,
+        "hallucination_recall_effective": 0.7105263157894737,
+        "macro_f1": 0.578021978021978,
+        "micro_f1": 0.6666666666666666,
+        "false_positive_rate": 0.7619047619047619,
+        "false_negative_rate": 0.0,
+        "mean_latency_ms": 1173.923552631579
+      },
+      "calibration": {
+        "ece": 0.06737437324471901,
+        "brier": 0.14484522275241035,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 8,
+            "mean_prob": 0.05776555085932809,
+            "frac_supported": 0.0
+          },
+          {
+            "bin": 1,
+            "n": 89,
+            "mean_prob": 0.13793040747813026,
+            "frac_supported": 0.11235955056179775
+          },
+          {
+            "bin": 2,
+            "n": 46,
+            "mean_prob": 0.250653910569563,
+            "frac_supported": 0.2608695652173913
+          },
+          {
+            "bin": 3,
+            "n": 33,
+            "mean_prob": 0.31968383663705036,
+            "frac_supported": 0.6363636363636364
+          },
+          {
+            "bin": 4,
+            "n": 25,
+            "mean_prob": 0.44447595214846986,
+            "frac_supported": 0.44
+          },
+          {
+            "bin": 5,
+            "n": 9,
+            "mean_prob": 0.5540069252904131,
+            "frac_supported": 0.7777777777777778
+          },
+          {
+            "bin": 6,
+            "n": 15,
+            "mean_prob": 0.6769802098911272,
+            "frac_supported": 0.5333333333333333
+          },
+          {
+            "bin": 7,
+            "n": 10,
+            "mean_prob": 0.7653279775703565,
+            "frac_supported": 0.9
+          },
+          {
+            "bin": 8,
+            "n": 31,
+            "mean_prob": 0.8607384967862857,
+            "frac_supported": 0.8709677419354839
+          },
+          {
+            "bin": 9,
+            "n": 58,
+            "mean_prob": 0.9443681671431589,
+            "frac_supported": 0.9827586206896551
+          }
+        ]
+      }
+    },
+    "ablate_no_vlm": {
+      "description": "Ablation: EAV-SA without the VLM (localizers + rules only).",
+      "selected_params": {
+        "vlm_strong": 0.75,
+        "detector_strong": 0.4,
+        "grounding_strong": 0.35,
+        "decision_threshold": 0.25
+      },
+      "val_objective": -0.6692307692307693,
+      "calibrator": {
+        "a": 3.4233755529128866,
+        "b": 0.12018156293026806,
+        "fitted_on": "val",
+        "n_examples": 130
+      },
+      "overall": {
+        "n": 324.0,
+        "n_covered": 90.0,
+        "coverage": 0.2777777777777778,
+        "abstention_rate": 0.7222222222222222,
+        "accuracy_covered": 0.9777777777777777,
+        "accuracy_effective": 0.2716049382716049,
+        "supported_precision": 0.9864864864864865,
+        "supported_recall": 0.9864864864864865,
+        "supported_f1": 0.9864864864864865,
+        "supported_recall_effective": 0.4506172839506173,
+        "hallucination_precision": 0.9375,
+        "hallucination_recall": 0.9375,
+        "hallucination_f1": 0.9375,
+        "hallucination_recall_effective": 0.09259259259259259,
+        "macro_f1": 0.9619932432432432,
+        "micro_f1": 0.9777777777777777,
+        "false_positive_rate": 0.013513513513513514,
+        "false_negative_rate": 0.0625,
+        "mean_latency_ms": 840.1632716049384
+      },
+      "confidence_intervals_95": {
+        "macro_f1": {
+          "low": 0.873015873015873,
+          "high": 1.0
+        },
+        "accuracy_covered": {
+          "low": 0.9304347826086956,
+          "high": 1.0
+        },
+        "coverage": {
+          "low": 0.22756410256410256,
+          "high": 0.3231707317073171
+        },
+        "hallucination_f1": {
+          "low": 0.7857142857142857,
+          "high": 1.0
+        },
+        "accuracy_effective": {
+          "low": 0.22151898734177214,
+          "high": 0.3192771084337349
+        }
+      },
+      "confusion_matrix": {
+        "SUPPORTED": {
+          "SUPPORTED": 73,
+          "CONTRADICTED": 1,
+          "ABSTAIN": 88
+        },
+        "CONTRADICTED": {
+          "SUPPORTED": 1,
+          "CONTRADICTED": 15,
+          "ABSTAIN": 146
+        }
+      },
+      "per_category": {
+        "count": {
+          "n": 286.0,
+          "n_covered": 60.0,
+          "coverage": 0.2097902097902098,
+          "abstention_rate": 0.7902097902097902,
+          "accuracy_covered": 0.9666666666666667,
+          "accuracy_effective": 0.20279720279720279,
+          "supported_precision": 0.9830508474576272,
+          "supported_recall": 0.9830508474576272,
+          "supported_f1": 0.9830508474576272,
+          "supported_recall_effective": 0.40559440559440557,
+          "hallucination_precision": 0.0,
+          "hallucination_recall": 0.0,
+          "hallucination_f1": 0.0,
+          "hallucination_recall_effective": 0.0,
+          "macro_f1": 0.4915254237288136,
+          "micro_f1": 0.9666666666666667,
+          "false_positive_rate": 0.01694915254237288,
+          "false_negative_rate": 1.0,
+          "mean_latency_ms": 793.391923076923
+        },
+        "spatial_relation": {
+          "n": 38.0,
+          "n_covered": 30.0,
+          "coverage": 0.7894736842105263,
+          "abstention_rate": 0.21052631578947367,
+          "accuracy_covered": 1.0,
+          "accuracy_effective": 0.7894736842105263,
+          "supported_precision": 1.0,
+          "supported_recall": 1.0,
+          "supported_f1": 1.0,
+          "supported_recall_effective": 0.7894736842105263,
+          "hallucination_precision": 1.0,
+          "hallucination_recall": 1.0,
+          "hallucination_f1": 1.0,
+          "hallucination_recall_effective": 0.7894736842105263,
+          "macro_f1": 1.0,
+          "micro_f1": 1.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "mean_latency_ms": 1192.1792105263157
+        }
+      },
+      "ambiguous_cases": {
+        "n": 76.0,
+        "n_covered": 5.0,
+        "coverage": 0.06578947368421052,
+        "abstention_rate": 0.9342105263157895,
+        "accuracy_covered": 1.0,
+        "accuracy_effective": 0.06578947368421052,
+        "supported_precision": 1.0,
+        "supported_recall": 1.0,
+        "supported_f1": 1.0,
+        "supported_recall_effective": 0.13157894736842105,
+        "hallucination_precision": null,
+        "hallucination_recall": null,
+        "hallucination_f1": null,
+        "hallucination_recall_effective": 0.0,
+        "macro_f1": null,
+        "micro_f1": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": null,
+        "mean_latency_ms": 760.8821052631579
+      },
+      "calibration": {
+        "ece": 0.0904053213249047,
+        "brier": 0.12757841808644219,
+        "n_calibration": 324.0,
+        "reliability": [
+          {
+            "bin": 0,
+            "n": 15,
+            "mean_prob": 0.03546177902640759,
+            "frac_supported": 0.0
+          },
+          {
+            "bin": 1,
+            "n": 86,
+            "mean_prob": 0.1703551864817673,
+            "frac_supported": 0.09302325581395349
+          },
+          {
+            "bin": 2,
+            "n": 44,
+            "mean_prob": 0.23272064406630555,
+            "frac_supported": 0.22727272727272727
+          },
+          {
+            "bin": 3,
+            "n": 25,
+            "mean_prob": 0.3892430481168343,
+            "frac_supported": 0.44
+          },
+          {
+            "bin": 4,
+            "n": 32,
+            "mean_prob": 0.47298693163744865,
+            "frac_supported": 0.875
+          },
+          {
+            "bin": 5,
+            "n": 4,
+            "mean_prob": 0.530009279235701,
+            "frac_supported": 0.5
+          },
+          {
+            "bin": 6,
+            "n": 12,
+            "mean_prob": 0.6661578254490363,
+            "frac_supported": 0.3333333333333333
+          },
+          {
+            "bin": 7,
+            "n": 1,
+            "mean_prob": 0.7030839881387226,
+            "frac_supported": 1.0
+          },
+          {
+            "bin": 8,
+            "n": 35,
+            "mean_prob": 0.8636241041330811,
+            "frac_supported": 0.8285714285714286
+          },
+          {
+            "bin": 9,
+            "n": 70,
+            "mean_prob": 0.9557412802286795,
+            "frac_supported": 0.9857142857142858
+          }
+        ]
+      }
+    }
+  },
+  "comparisons": {
+    "full_vs_vlm_only": {
+      "metric": "macro_f1",
+      "diff": 0.19098139102357203,
+      "ci_low": 0.14031477577347184,
+      "ci_high": 0.24347842325981361,
+      "p_value": 0.0
+    },
+    "full_vs_detector_rules": {
+      "metric": "macro_f1",
+      "diff": 0.06301028324613445,
+      "ci_low": 0.029382153123309496,
+      "ci_high": 0.10217261904761898,
+      "p_value": 0.0
+    },
+    "full_vs_vlm_grounding": {
+      "metric": "macro_f1",
+      "diff": -0.03174965151879117,
+      "ci_low": -0.08041793226172655,
+      "ci_high": 0.01385654328924435,
+      "p_value": 0.164
+    },
+    "eav_sa_vs_full": {
+      "metric": "accuracy_covered",
+      "diff": 0.03338945005611671,
+      "ci_low": -0.0011448019801979514,
+      "ci_high": 0.06784256083619133,
+      "p_value": 0.056
+    },
+    "eav_sa_vs_vlm_only": {
+      "metric": "accuracy_covered",
+      "diff": 0.22783389450056113,
+      "ci_low": 0.1782714872833403,
+      "ci_high": 0.2789701519646425,
+      "p_value": 0.0
+    },
+    "ablate_no_grounding_vs_eav_sa": {
+      "metric": "macro_f1",
+      "diff": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0
+    },
+    "ablate_no_detector_vs_eav_sa": {
+      "metric": "macro_f1",
+      "diff": -0.11156417112299466,
+      "ci_low": -0.1563029262826422,
+      "ci_high": -0.07152688581213595,
+      "p_value": 0.0
+    },
+    "ablate_no_disagreement_vs_eav_sa": {
+      "metric": "macro_f1",
+      "diff": 0.004693675889327897,
+      "ci_low": 0.0009664948453608213,
+      "ci_high": 0.011216931216931236,
+      "p_value": 0.024
+    },
+    "ablate_no_vlm_vs_eav_sa": {
+      "metric": "macro_f1",
+      "diff": 0.15631142506142504,
+      "ci_low": 0.07464129900454708,
+      "ci_high": 0.22612126245847164,
+      "p_value": 0.002
+    }
+  },
+  "runtime": {
+    "evidence_collection_s": 580.6,
+    "peak_rss_mb": 5546.4
+  },
+  "started_at": "2026-10-24T17:09:53.830008+00:00",
+  "finished_at": "2026-10-24T17:19:59.069051+00:00"
+}
