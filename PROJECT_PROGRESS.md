@@ -23,7 +23,7 @@ It is updated at the end of every phase. Only results that were actually execute
 - [x] Phase 7 — React frontend + evidence visualization
 - [x] Phase 8 — Dataset adapters, baselines, metrics, reproducible experiments
 - [x] Phase 9 — Security, integration, adversarial tests, performance checks
-- [ ] Phase 10 — Docker, docs, CI, end-to-end verification, push to GitHub
+- [x] Phase 10 — Docker, docs, CI, end-to-end verification, push to GitHub
 
 ## Log
 
@@ -59,3 +59,5 @@ It is updated at the end of every phase. Only results that were actually execute
 - Slim Docker image built and smoke-tested (health ready, UI 200). Full ML image not built.
 - Playwright E2E 2 passed; backend 145 passed; frontend 17 passed; ruff clean.
 - CI workflow committed; push blocked until the GitHub token has the `workflow` scope.
+- CHAIR generate-and-verify (80 images, 141 claims): `experiments/runs/chair-generate-verify-20261025T191948`. CHAIR-i 0.079 → 0.059 after filtering; 3/10
+  hallucinated mentions caught, 0 false alarms.

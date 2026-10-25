@@ -203,6 +203,10 @@ Full report: [`experiments/runs/coco-cs-v1-20261024T170953-c225d2/report.md`](ex
   on this data.
 - Spatial claims are few (38 test claims); every abstaining variant was 100% accurate on those it decided.
 
+**CHAIR generate-and-verify, 80 COCO images, 141 claims from SmolVLM captions** ([report](experiments/runs/chair-generate-verify-20261025T191948/report.md)):
+captions hallucinated 7.9% of object mentions (CHAIR-i). Removing mentions the verifier contradicted lowered that to 5.9%
+with no false alarms, but only 3 of the 10 hallucinated mentions were caught (5 abstained). The sample has few positives.
+
 **Video sampling ablation (synthetic videos, sampling only, no models):** with a 4-frame budget, scene-aware sampling
 captured a frame inside 100% of brief (0.3–1.2 s) abrupt events vs 10–40% for uniform/interval sampling
 ([report](experiments/runs/video-sampling-synthetic-20261023T170939/report.md)). These are best-case, high-contrast

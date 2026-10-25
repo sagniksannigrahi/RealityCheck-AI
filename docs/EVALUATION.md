@@ -110,9 +110,22 @@ Notes:
 
 ### CHAIR generate-and-verify
 
-Not yet run to completion. `scripts/run_chair_experiment.py` now runs end to end (a 3-image smoke run passed) and
-labels objects with COCO instances plus reference-caption mentions, as in the original CHAIR. Reproduce with
-`python scripts/run_chair_experiment.py --images 80 --seed 21` (≈5 s/image on CPU).
+`experiments/runs/chair-generate-verify-20261025T191948` — 80 COCO val2014 images (seed 21). SmolVLM writes a caption; object-existence claims that map to a COCO
+class are labelled SUPPORTED if the class is in the instance annotations or named in the 5 reference captions (as in
+CHAIR), else CONTRADICTED. EAV-SA uses the **untuned default thresholds** (no tuning on this data).
+
+| Measure | Value |
+|---|---|
+| Claims checked | 141 (131 gold SUPPORTED, 10 gold CONTRADICTED) |
+| CHAIR-i / CHAIR-s of raw captions | 0.079 / 0.138 (139 object mentions) |
+| CHAIR-i after removing mentions the verifier contradicts | 0.059 |
+| EAV-SA coverage / accuracy on covered | 0.901 / 0.984 |
+| Hallucination precision / recall (covered) / effective recall | 1.00 / 0.60 / 0.30 |
+| Confusion (gold → pred) | SUPPORTED: 122 S, 0 C, 9 abstain · CONTRADICTED: 2 S, 3 C, 5 abstain |
+
+The verifier raised no false alarms and cut CHAIR-i from 0.079 to 0.059, but it caught only 3 of 10 hallucinated
+mentions (5 abstained, 2 missed). With only 10 positives this is anecdotal, not a reliable recall estimate.
+Generator and verifier share SmolVLM weights, and COCO labels remain incomplete. Runtime 346.7 s (≈4.3 s/image).
 
 ### Earlier runs
 
