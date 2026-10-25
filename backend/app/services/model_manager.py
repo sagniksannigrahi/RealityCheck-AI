@@ -103,7 +103,8 @@ class ModelRegistry:
         def grounder():
             from app.grounding.grounding_dino import GroundingDinoGrounder
 
-            return GroundingDinoGrounder(model_id=s.grounding_model_id, device=self.device, cache_dir=cache)
+            return GroundingDinoGrounder(model_id=s.grounding_model_id, device=self.device, cache_dir=cache,
+                                         revision=s.revision_for(s.grounding_model_id))
 
         def vlm(role: str, model_id: str):
             def make():
@@ -122,7 +123,7 @@ class ModelRegistry:
                 from app.vlm.smolvlm import SmolVLMAdapter
 
                 return SmolVLMAdapter(model_id=model_id, device=self.device, cache_dir=cache, role=role,
-                                      image_splitting=s.vlm_image_splitting)
+                                      image_splitting=s.vlm_image_splitting, revision=s.revision_for(model_id))
 
             return make
 

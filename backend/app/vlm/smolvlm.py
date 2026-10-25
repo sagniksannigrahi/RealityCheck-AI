@@ -15,16 +15,17 @@ from app.vlm.base import DESCRIBE_PROMPT, VLMJudgment
 class SmolVLMAdapter:
     def __init__(self, model_id: str = "HuggingFaceTB/SmolVLM-500M-Instruct", device: str = "cpu",
                  cache_dir: str | None = None, max_image_side: int = 768, role: str = "verifier",
-                 image_splitting: bool = False) -> None:
+                 image_splitting: bool = False, revision: str | None = None) -> None:
         import torch
         import transformers
         from transformers import AutoModelForImageTextToText, AutoProcessor
 
         self._torch = torch
-        self._processor = AutoProcessor.from_pretrained(model_id, cache_dir=cache_dir)
+        self._processor = AutoProcessor.from_pretrained(model_id, cache_dir=cache_dir, revision=revision)
         if hasattr(self._processor, "image_processor"):
             self._processor.image_processor.do_image_splitting = image_splitting
-        self._model = AutoModelForImageTextToText.from_pretrained(model_id, dtype=torch.float32, cache_dir=cache_dir).eval()
+        self._model = AutoModelForImageTextToText.from_pretrained(
+            model_id, dtype=torch.float32, cache_dir=cache_dir, revision=revision).eval()
         self._model.to(device)
         self._device = device
         self._max_side = max_image_side

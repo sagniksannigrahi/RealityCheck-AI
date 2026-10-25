@@ -9,6 +9,7 @@ __pycache__/
 htmlcov/
 # Node
 frontend/node_modules/
+frontend/*.tsbuildinfo
 frontend/dist/
 frontend/test-results/
 # Local data, secrets, models, large datasets

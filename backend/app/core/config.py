@@ -15,6 +15,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
+# Hugging Face commits the default models were tested and evaluated with. Pinning stops an upstream repo change
+# from silently swapping the weights or loading code (see docs/SECURITY.md).
+DEFAULT_MODEL_REVISIONS: dict[str, str] = {
+    "IDEA-Research/grounding-dino-tiny": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+    "HuggingFaceTB/SmolVLM-500M-Instruct": "a7da5b986cb59b408707209984f360a5f4ad7e47",
+}
+
 
 class ModelBackend(StrEnum):
     """Which model adapters the pipeline uses.
@@ -104,6 +111,10 @@ class Settings(BaseSettings):
     # SmolVLM image tiling: ~10x slower on CPU when enabled (measured 3.6 s vs 0.36 s per question)
     vlm_image_splitting: bool = False
     model_cache_dir: Path | None = None
+    # Hub model id -> commit hash. Override with RC_MODEL_REVISIONS='{"org/model": "<sha>"}'; models not listed
+    # load the latest revision. RC_PIN_MODEL_REVISIONS=false always loads the latest.
+    model_revisions: dict[str, str] = Field(default_factory=lambda: dict(DEFAULT_MODEL_REVISIONS))
+    pin_model_revisions: bool = True
 
     # --- external providers (opt-in only) ---
     allow_external_providers: bool = False
@@ -138,6 +149,10 @@ class Settings(BaseSettings):
     @property
     def is_sqlite(self) -> bool:
         return self.database_url.startswith("sqlite")
+
+    def revision_for(self, model_id: str) -> str | None:
+        """Pinned Hub commit for ``model_id``, or None to load the latest revision."""
+        return self.model_revisions.get(model_id) if self.pin_model_revisions else None
 
     external_media_note: str = Field(
         default="Media is sent to an external provider only when RC_ALLOW_EXTERNAL_PROVIDERS=true "
