@@ -1,0 +1,140 @@
+{
+  "config": {
+    "run_id": "chair-generate-verify-20261025T191948",
+    "images": 80,
+    "seed": 21,
+    "policy": "default (untuned)",
+    "models": {
+      "detector": {
+        "component": "detector",
+        "name": "ultralytics/yolo11n.pt",
+        "version": "ultralytics-8.4.184+sha256:0ebbc80d4a76",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      },
+      "grounder": {
+        "component": "grounding",
+        "name": "IDEA-Research/grounding-dino-tiny",
+        "version": "transformers-4.57.6",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      },
+      "verifier": {
+        "component": "vlm_verifier",
+        "name": "HuggingFaceTB/SmolVLM-500M-Instruct",
+        "version": "transformers-4.57.6+tiling=off",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      },
+      "generator": {
+        "component": "vlm_generator",
+        "name": "HuggingFaceTB/SmolVLM-500M-Instruct",
+        "version": "transformers-4.57.6+tiling=off",
+        "device": "cpu",
+        "demo": false,
+        "external": false
+      }
+    },
+    "note": "Labels = COCO instance annotations + objects named in the 5 reference captions (still incomplete); generator and verifier share SmolVLM weights."
+  },
+  "chair_raw": {
+    "chair_i": 0.07913669064748201,
+    "chair_s": 0.1375,
+    "objects_mentioned": 139.0,
+    "captions": 80.0
+  },
+  "chair_after_filtering": {
+    "chair_i": 0.058823529411764705,
+    "objects_mentioned": 136
+  },
+  "verification": {
+    "overall": {
+      "n": 141.0,
+      "n_covered": 127.0,
+      "coverage": 0.900709219858156,
+      "abstention_rate": 0.099290780141844,
+      "accuracy_covered": 0.984251968503937,
+      "accuracy_effective": 0.8865248226950354,
+      "supported_precision": 0.9838709677419355,
+      "supported_recall": 1.0,
+      "supported_f1": 0.991869918699187,
+      "supported_recall_effective": 0.9312977099236641,
+      "hallucination_precision": 1.0,
+      "hallucination_recall": 0.6,
+      "hallucination_f1": 0.7499999999999999,
+      "hallucination_recall_effective": 0.3,
+      "macro_f1": 0.8709349593495934,
+      "micro_f1": 0.984251968503937,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 0.4,
+      "mean_latency_ms": 0.0
+    },
+    "confidence_intervals_95": {
+      "macro_f1": {
+        "low": 0.49583333333333335,
+        "high": 1.0
+      },
+      "accuracy_covered": {
+        "low": 0.96,
+        "high": 1.0
+      },
+      "coverage": {
+        "low": 0.8602941176470589,
+        "high": 0.9435483870967742
+      },
+      "hallucination_f1": {
+        "low": 0.0,
+        "high": 1.0
+      },
+      "accuracy_effective": {
+        "low": 0.8431372549019608,
+        "high": 0.9312977099236641
+      }
+    },
+    "confusion_matrix": {
+      "SUPPORTED": {
+        "SUPPORTED": 122,
+        "CONTRADICTED": 0,
+        "ABSTAIN": 9
+      },
+      "CONTRADICTED": {
+        "SUPPORTED": 2,
+        "CONTRADICTED": 3,
+        "ABSTAIN": 5
+      }
+    },
+    "per_category": {
+      "generated_existence": {
+        "n": 141.0,
+        "n_covered": 127.0,
+        "coverage": 0.900709219858156,
+        "abstention_rate": 0.099290780141844,
+        "accuracy_covered": 0.984251968503937,
+        "accuracy_effective": 0.8865248226950354,
+        "supported_precision": 0.9838709677419355,
+        "supported_recall": 1.0,
+        "supported_f1": 0.991869918699187,
+        "supported_recall_effective": 0.9312977099236641,
+        "hallucination_precision": 1.0,
+        "hallucination_recall": 0.6,
+        "hallucination_f1": 0.7499999999999999,
+        "hallucination_recall_effective": 0.3,
+        "macro_f1": 0.8709349593495934,
+        "micro_f1": 0.984251968503937,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.4,
+        "mean_latency_ms": 0.0
+      }
+    },
+    "ambiguous_cases": null,
+    "calibration": {
+      "ece": null,
+      "brier": null,
+      "n_calibration": 0.0
+    }
+  },
+  "seconds": 346.7
+}
