@@ -49,8 +49,9 @@ def main() -> None:
     from huggingface_hub import snapshot_download
 
     for repo in {s.grounding_model_id, s.vlm_model_id, s.generator_model_id}:
-        path = snapshot_download(repo, cache_dir=str(s.model_cache_dir) if s.model_cache_dir else None)
-        print(f"{repo}: {path}")
+        rev = s.revision_for(repo)
+        path = snapshot_download(repo, revision=rev, cache_dir=str(s.model_cache_dir) if s.model_cache_dir else None)
+        print(f"{repo}@{rev or 'latest'}: {path}")
 
 
 if __name__ == "__main__":

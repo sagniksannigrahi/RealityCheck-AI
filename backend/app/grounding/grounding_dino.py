@@ -23,14 +23,15 @@ def _nms(cands: list[GroundingCandidate], iou_thr: float = 0.6) -> list[Groundin
 class GroundingDinoGrounder:
     def __init__(self, model_id: str = "IDEA-Research/grounding-dino-tiny", device: str = "cpu",
                  box_threshold: float = 0.20, text_threshold: float = 0.20, max_candidates: int = 8,
-                 cache_dir: str | None = None) -> None:
+                 cache_dir: str | None = None, revision: str | None = None) -> None:
         import torch
         import transformers
         from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
 
         self._torch = torch
-        self._processor = AutoProcessor.from_pretrained(model_id, cache_dir=cache_dir)
-        self._model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id, cache_dir=cache_dir).eval()
+        self._processor = AutoProcessor.from_pretrained(model_id, cache_dir=cache_dir, revision=revision)
+        self._model = AutoModelForZeroShotObjectDetection.from_pretrained(
+            model_id, cache_dir=cache_dir, revision=revision).eval()
         self._device = device
         self._model.to(device)
         self._box_thr = box_threshold

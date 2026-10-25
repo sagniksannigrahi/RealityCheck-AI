@@ -226,7 +226,7 @@ E2E_MODEL_BACKEND=real npx playwright test   # same flow with real models (slow,
 ```
 
 Latest results on the development machine (macOS, Python 3.12, Node 26):
-backend **145 passed** (3 real-model tests deselected by default), ruff clean; frontend **17 passed**, production build OK;
+backend **146 passed** (3 real-model tests deselected by default), ruff clean; frontend **17 passed**, production build OK;
 Playwright E2E **2 passed** (real server, demo models, Google Chrome). Against PostgreSQL 16 (Docker): Alembic
 upgrade → downgrade → upgrade with no drift, and the API/worker/security suites **50 passed**. The slim Docker image
 builds and passes the health/UI smoke test. CI runs all of the above.

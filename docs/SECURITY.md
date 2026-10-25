@@ -32,3 +32,9 @@
   frames and keeps the (non-media) result records. Users can delete a job and its media via `DELETE /api/v1/verifications/{id}`.
 - Licensing: Ultralytics YOLO is AGPL-3.0. Offering this service over a network with the Ultralytics detector may impose
   AGPL obligations; the detector is behind an interface and can be replaced.
+- Model supply chain: Grounding DINO and SmolVLM load from pinned Hugging Face commits (`DEFAULT_MODEL_REVISIONS` in
+  `backend/app/core/config.py`; override with `RC_MODEL_REVISIONS`, disable with `RC_PIN_MODEL_REVISIONS=false`), and
+  model ids cannot be set through the API. `transformers` 4.57.x has published advisories (PYSEC-2025-217,
+  PYSEC-2026-2288/2289/2290/3929/4174). They concern loading malicious model repos, the `Trainer` class,
+  checkpoint conversion or `save_pretrained`, none of which this service uses with untrusted input. The fixes ship
+  only in transformers 5.x. Upgrade, and re-run the evaluation, before loading models you do not control.

@@ -49,3 +49,13 @@ def test_inference_semaphore_is_reentrant_safe():
         pass
     with reg.inference():
         pass
+
+
+def test_model_revisions_are_pinned_by_default(monkeypatch):
+    s = Settings()
+    assert s.revision_for(s.grounding_model_id) == "a2bb814dd30d776dcf7e30523b00659f4f141c71"
+    assert s.revision_for(s.vlm_model_id) == "a7da5b986cb59b408707209984f360a5f4ad7e47"
+    assert s.revision_for("someone/unlisted-model") is None
+    assert Settings(pin_model_revisions=False).revision_for(s.vlm_model_id) is None
+    monkeypatch.setenv("RC_MODEL_REVISIONS", '{"HuggingFaceTB/SmolVLM-500M-Instruct": "abc123"}')
+    assert Settings().revision_for("HuggingFaceTB/SmolVLM-500M-Instruct") == "abc123"
